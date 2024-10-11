@@ -1,0 +1,48 @@
+.shimmer-card {
+    background: linear-gradient(
+      to right,
+      #f6f6f6 0%,
+      #f0f0f0 20%,
+      #f6f6f6 40%,
+      #f6f6f6 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+  
+
+
+
+/* client */
+.shimmer-container {
+  display: flex;
+  flex-direction: row; /* Change this to row */
+  gap: 10px; /* Space between shimmer items */
+  justify-content: space-between; /* Optional: Space out items evenly */
+}
+
+.shimmer-item {
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  border-radius: 5px;
+  height: 60px; /* Adjust height based on your design */
+  flex: 1; /* Allow items to grow equally */
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -100px 0;
+  }
+  100% {
+    background-position: 100px 0;
+  }
+}
