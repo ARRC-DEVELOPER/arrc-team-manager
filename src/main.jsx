@@ -7,7 +7,12 @@ import { Provider as ReduxProvider } from "react-redux";
 import store from "./redux/store.js";
 
 // export const server = "http://localhost:2000/api/v1";
-export const server = "http://127.0.0.1:5000/api";
+
+// Production URL
+// export const server = "http://127.0.0.1:5000/api";
+
+// Deployement URL
+export const server = "https://arrc-team-manager-server.onrender.com/api";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   // <React.StrictMode>
