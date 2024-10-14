@@ -11,27 +11,27 @@ const Card = ({
   dueDate,
   _id,
   column,
+  statusId,
   handleDragStart,
 }) => {
   return (
     <>
-      <DropIndicator beforeId={_id} column={column} />
+      <DropIndicator beforeId={_id} column={statusId.name} />
       <motion.div
         layout
         layoutId={_id}
         draggable="true"
-        onDragStart={(e) => handleDragStart(e, { title, _id, column })}
+        onDragStart={(e) => handleDragStart(e, { title, _id, column, statusId })}
         className="cursor-grab rounded border border-gray-300 bg-white p-3 active:cursor-grabbing"
       >
         <div className="flex justify-between items-start">
           <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
           <div className="flex items-center gap-2">
             <span className="bg-blue-100 text-blue-500 text-xs font-medium px-2.5 py-1 rounded-md">
-              {column}
+              {statusId.name}
             </span>
           </div>
         </div>
-        {/* <p className="text-sm text-gray-700 mt-2 mb-4">{description}</p> */}
         <div
           className="text-sm text-gray-700 mt-2 mb-4"
           dangerouslySetInnerHTML={{ __html: description }}

@@ -160,6 +160,7 @@ const Status = () => {
 
                 <h2 className="text-lg font-semibold">{status.name}</h2>
                 <p>Order: {status.order}</p>
+                <p>Count: {status.count}</p>
               </div>
             ))}
           </div>

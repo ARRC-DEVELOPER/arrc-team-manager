@@ -6,10 +6,8 @@ import DropIndicator from "./DropIndicator";
 import Card from "./Card";
 import { server } from "../../main";
 
-const Column = ({ title, headingColor, cards, column, setCards }) => {
+const Column = ({ title, headingColor, statusId, cards, column, setCards }) => {
   const [active, setActive] = useState(false);
-
-  console.log(column);
 
   const handleDragStart = (e, card) => {
     e.dataTransfer.setData("cardId", card._id);
@@ -30,7 +28,7 @@ const Column = ({ title, headingColor, cards, column, setCards }) => {
       let copy = [...cards];
       let cardToTransfer = copy.find((c) => c._id === cardId);
       if (!cardToTransfer) return;
-      cardToTransfer = { ...cardToTransfer, column };
+      cardToTransfer = { ...cardToTransfer, statusId };
 
       copy = copy.filter((c) => c._id !== cardId);
 
@@ -45,12 +43,24 @@ const Column = ({ title, headingColor, cards, column, setCards }) => {
         copy.splice(insertAtIndex, 0, cardToTransfer);
       }
 
+      console.log(copy);
       setCards(copy);
 
-      axios
-        .put(`${server}/tasks/updateCardColumn/${cardId}`, { column })
-        .then((res) => console.log("Card updated:", res.data))
-        .catch((err) => console.error("Error updating card:", err));
+      try {
+        const updatedCard = await axios.put(
+          `${server}/tasks/updateCardColumn/${cardId}`,
+          {
+            statusId,
+          }
+        );
+
+        console.log("Card updated: ", updatedCard);
+
+        const response = await axios.get(`${server}/tasks`);
+        setCards(response.data);
+      } catch (err) {
+        console.error("Error updating card:", err);
+      }
     }
   };
 
@@ -112,7 +122,7 @@ const Column = ({ title, headingColor, cards, column, setCards }) => {
     setActive(false);
   };
 
-  const filteredCards = cards.filter((c) => c.column === column);
+  const filteredCards = cards.filter((card) => card.statusId._id == statusId);
 
   return (
     <div className="w-56 shrink-0">
