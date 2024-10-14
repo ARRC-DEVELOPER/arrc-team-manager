@@ -31,7 +31,11 @@ const Card = ({
             </span>
           </div>
         </div>
-        <p className="text-sm text-gray-700 mt-2 mb-4">{description}</p>
+        {/* <p className="text-sm text-gray-700 mt-2 mb-4">{description}</p> */}
+        <div
+          className="text-sm text-gray-700 mt-2 mb-4"
+          dangerouslySetInnerHTML={{ __html: description }}
+        ></div>
         <div className="text-sm text-gray-600 space-y-1">
           <p>
             <span className="font-medium text-gray-700">Assigned to:</span>{" "}
