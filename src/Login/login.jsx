@@ -1,32 +1,31 @@
 import React, { useState } from "react";
 import { Button, Form, Input, message } from "antd";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { server } from "../main";
 
 const Login = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogin = async (values) => {
     setLoading(true);
     try {
-      const response = await axios.post(
-        "https://task-manager-backend-btas.onrender.com/api/auth/login",
-        values
-      );
+      const response = await axios.post(`${server}/auth/login`, values);
       const { token, user } = response.data;
 
       localStorage.setItem("authToken", token);
 
-      const roleResponse = await axios.get(
-        `https://task-manager-backend-btas.onrender.com/api/roles/${user.role}`
-      );
+      const roleResponse = await axios.get(`${server}/roles/${user.role}`);
       const userWithRole = { ...user, role: roleResponse.data };
 
       onLogin(userWithRole);
 
       message.success("Login successful!");
-      navigate("/dashboard");
+      // navigate("/dashboard");
+      const redirectTo = location.state?.from?.pathname || "/dashboard";
+      navigate(redirectTo, { replace: true });
     } catch (error) {
       message.error("Login failed. Please check your credentials.");
     } finally {
