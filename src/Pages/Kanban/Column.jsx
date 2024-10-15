@@ -6,7 +6,16 @@ import DropIndicator from "./DropIndicator";
 import Card from "./Card";
 import { server } from "../../main";
 
-const Column = ({ title, headingColor, statusId, cards, column, setCards }) => {
+const Column = ({
+  title,
+  headingColor,
+  statusId,
+  cards,
+  column,
+  setCards,
+  handleEditTask,
+  handleDeleteTask,
+}) => {
   const [active, setActive] = useState(false);
 
   const handleDragStart = (e, card) => {
@@ -141,7 +150,15 @@ const Column = ({ title, headingColor, statusId, cards, column, setCards }) => {
         }`}
       >
         {filteredCards.map((c) => {
-          return <Card key={c._id} {...c} handleDragStart={handleDragStart} />;
+          return (
+            <Card
+              key={c._id}
+              {...c}
+              handleDragStart={handleDragStart}
+              handleEditTask={handleEditTask}
+              handleDeleteTask={handleDeleteTask}
+            />
+          );
         })}
         <DropIndicator beforeId={null} column={column} />
       </div>

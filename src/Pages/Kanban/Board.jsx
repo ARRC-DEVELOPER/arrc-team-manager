@@ -13,6 +13,21 @@ import AddTask from "./AddTask";
 const Board = () => {
   const [cards, setCards] = useState([]);
   const [statuses, setStatuses] = useState([]);
+  const [editingTask, setEditingTask] = useState(null);
+
+  const handleEditTask = (task) => {
+    console.log("Edditing task: ", task);
+    setEditingTask(task);
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await axios.delete(`${server}/tasks/${taskId}`);
+      setCards((prev) => prev.filter((c) => c._id !== taskId));
+    } catch (error) {
+      console.error("Error deleting card", error);
+    }
+  };
 
   console.log("Tasks Data: ", cards);
   console.log("Status Data: ", statuses);
@@ -47,39 +62,11 @@ const Board = () => {
 
   return (
     <>
-      <AddTask setCards={setCards} />
-
-      {/* <div className="flex h-full w-full gap-3 overflow-scroll p-12">
-        <Column
-          title="Backlog"
-          column="backlog"
-          headingColor="text-neutral-500"
-          cards={cards}
-          setCards={setCards}
-        />
-        <Column
-          title="TODO"
-          column="todo"
-          headingColor="text-yellow-500"
-          cards={cards}
-          setCards={setCards}
-        />
-        <Column
-          title="In progress"
-          column="doing"
-          headingColor="text-blue-500"
-          cards={cards}
-          setCards={setCards}
-        />
-        <Column
-          title="Complete"
-          column="done"
-          headingColor="text-emerald-500"
-          cards={cards}
-          setCards={setCards}
-        />
-        <BurnBarrel setCards={setCards} />
-      </div> */}
+      <AddTask
+        setCards={setCards}
+        editingTask={editingTask}
+        setEditingTask={setEditingTask}
+      />
 
       <div className="flex h-full w-full gap-3 overflow-scroll p-12">
         {statuses.map((status) => (
@@ -99,9 +86,11 @@ const Board = () => {
             }
             cards={cards}
             setCards={setCards}
+            handleEditTask={handleEditTask}
+            handleDeleteTask={handleDeleteTask}
           />
         ))}
-        <BurnBarrel setCards={setCards} />
+        {/* <BurnBarrel setCards={setCards} /> */}
       </div>
     </>
   );

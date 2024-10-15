@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 
 import { server } from "../../main";
 
-const AddTask = ({ setCards }) => {
+const AddTask = ({ setCards, editingTask, setEditingTask }) => {
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
 
@@ -16,25 +16,44 @@ const AddTask = ({ setCards }) => {
   const [taskData, setTaskData] = useState({
     title: "",
     description: "",
-    assignedTo: "",
+    assignedTo: [],
     projectId: "",
     dueDate: "",
     status: "pending",
     pageSize: 10,
     sortBy: "title",
+    attachments: [],
   });
 
-  const [addTask, setaddTask] = useState({
-    title: "",
-    description: "",
-    assignedTo: "",
-    projectId: "",
-    dueDate: "",
-    status: "pending",
-    priority: "low",
-    estimateTime: "",
-    tags: "",
-  });
+  const [addTask, setaddTask] = useState(
+    editingTask || {
+      title: "",
+      description: "",
+      assignedTo: [],
+      projectId: "",
+      dueDate: "",
+      status: "pending",
+      priority: "low",
+      estimateTime: "",
+      tags: "",
+      attachments: [],
+    }
+  );
+
+  console.log(addTask);
+
+  useEffect(() => {
+    if (editingTask) {
+      setaddTask({
+        ...editingTask,
+        dueDate: editingTask.dueDate
+          ? new Date(editingTask.dueDate).toISOString().split("T")[0]
+          : "",
+        tags: editingTask.tags ? editingTask.tags.join(", ") : "",
+      });
+      setIsModalVisibleNew(true);
+    }
+  }, [editingTask]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,8 +109,67 @@ const AddTask = ({ setCards }) => {
   };
 
   const handleInputChange = (e) => {
-    if (e.target) {
-      const { name, value } = e.target;
+    const { name, value } = e.target;
+
+    if (name === "assignedTo") {
+      const selectedUserId = value;
+      console.log(selectedUserId);
+      setTaskData((prevData) => {
+        const assignedTo = prevData.assignedTo.includes(selectedUserId)
+          ? prevData.assignedTo.filter((id) => id !== selectedUserId) // Remove if already selected
+          : [...prevData.assignedTo, selectedUserId]; // Add if not selected
+        return { ...prevData, assignedTo };
+      });
+
+      setaddTask((prevData) => {
+        const assignedTo = prevData.assignedTo.includes(selectedUserId)
+          ? prevData.assignedTo.filter((id) => id !== selectedUserId)
+          : [...prevData.assignedTo, selectedUserId];
+        return { ...prevData, assignedTo };
+      });
+    } else if (name === "attachments") {
+      const selectedFile = e.target.files[0];
+      console.log(selectedFile);
+
+      setTaskData((prevData) => {
+        const attachments = prevData.assignedTo.includes(selectedFile)
+          ? prevData.attachments.filter((id) => id !== selectedFile) // Remove if already selected
+          : [...prevData.attachments, selectedFile]; // Add if not selected
+        return { ...prevData, attachments };
+      });
+
+      setaddTask((prevData) => {
+        const attachments = prevData.assignedTo.includes(selectedFile)
+          ? prevData.attachments.filter((id) => id !== selectedFile) // Remove if already selected
+          : [...prevData.attachments, selectedFile]; // Add if not selected
+        return { ...prevData, attachments };
+      });
+    } else if (name === "dueDate") {
+      console.log(value);
+      setTaskData((prevData) => ({ ...prevData, dueDate: value }));
+      setaddTask((prevData) => ({ ...prevData, dueDate: value }));
+
+      const currentTime = new Date();
+      const selectedDueDate = new Date(value);
+      const timeDifference = selectedDueDate - currentTime;
+
+      if (timeDifference > 0) {
+        const seconds = Math.floor((timeDifference / 1000) % 60);
+        const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
+        const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
+        const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+
+        let estimateTime = "";
+        if (days > 0) estimateTime += `${days} day${days > 1 ? "s" : ""} `;
+        if (hours > 0) estimateTime += `${hours} hour${hours > 1 ? "s" : ""}`;
+
+        setTaskData((prevData) => ({ ...prevData, estimateTime }));
+        setaddTask((prevData) => ({ ...prevData, estimateTime }));
+      } else {
+        setTaskData((prevData) => ({ ...prevData, estimateTime: "" }));
+        setaddTask((prevData) => ({ ...prevData, estimateTime: "" }));
+      }
+    } else if (e.target) {
       setTaskData((prevData) => ({ ...prevData, [name]: value }));
       setaddTask((prevData) => ({ ...prevData, [name]: value }));
     } else {
@@ -107,37 +185,63 @@ const AddTask = ({ setCards }) => {
     formData.append("title", addTask.title);
     formData.append("projectId", addTask.projectId);
     formData.append("priority", addTask.priority);
-    formData.append("assignedTo", addTask.assignedTo);
+    addTask.assignedTo.forEach((userId) =>
+      formData.append("assignedTo", userId)
+    );
     formData.append("dueDate", addTask.dueDate);
     formData.append("estimateTime", addTask.estimateTime);
     formData.append("tags", addTask.tags);
     formData.append("description", addTask.description);
 
-    const attachments = document.querySelector(
-      'input[name="attachments"]'
-    ).files;
-    for (let i = 0; i < attachments.length; i++) {
-      formData.append("attachments", attachments[i]);
-    }
+    addTask.attachments.forEach((file) => formData.append("attachments", file));
 
-    try {
-      const response = await axios.post(`${server}/tasks`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+    if (editingTask) {
+      // EDDITING TASK
+      try {
+        const response = await axios.put(
+          `${server}/tasks/${editingTask._id}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
 
-      console.log(response.data.savedTask);
+        // Re-fetch tasks after updating
+        const updatedTasks = await axios.get(`${server}/tasks`);
+        setCards(updatedTasks.data);
 
-      setCards((prev) => [...prev, response.data.savedTask]);
+        setIsModalVisibleNew(false);
+        setEditingTask(null);
 
-      setIsModalVisibleNew(false);
+        toast.success("Task updated successfully!");
 
-      toast.success("Task added successfully!");
+        console.log("Task updated successfully:", response.data);
+      } catch (error) {
+        console.error("Error updating task:", error);
+      }
+    } else {
+      // ADDING NEW TASK
+      try {
+        const response = await axios.post(`${server}/tasks`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
-      console.log("Task added successfully:", response.data);
-    } catch (error) {
-      console.error("Error adding task:", error);
+        console.log(response.data.savedTask);
+
+        setCards((prev) => [...prev, response.data.savedTask]);
+
+        setIsModalVisibleNew(false);
+
+        toast.success("Task added successfully!");
+
+        console.log("Task added successfully:", response.data);
+      } catch (error) {
+        console.error("Error adding task:", error);
+      }
     }
   };
 
@@ -181,7 +285,7 @@ const AddTask = ({ setCards }) => {
       </div>
 
       <Modal
-        title="Add Task"
+        title={editingTask ? "Edit Task" : "Add Task"}
         visible={isModalVisibleNew}
         onCancel={handleCancel}
         footer={null}
@@ -247,6 +351,7 @@ const AddTask = ({ setCards }) => {
               <option value="high">High</option>
             </select>
           </div>
+
           <div>
             <label
               className="block mb-2 font-semibold text-gray-700"
@@ -259,16 +364,32 @@ const AddTask = ({ setCards }) => {
               value={addTask.assignedTo}
               onChange={handleInputChange}
               className="form-select border border-gray-300 rounded-md p-3 w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              multiple
               required
             >
-              <option value="">Select User</option>
               {users.map((user) => (
                 <option key={user._id} value={user._id}>
                   {user.name}
                 </option>
               ))}
             </select>
+
+            {/* Display selected users */}
+            <div className="mt-4">
+              <h4 className="font-semibold text-gray-600">Selected Users:</h4>
+              <ul>
+                {addTask.assignedTo.length > 0 ? (
+                  addTask.assignedTo.map((userId) => {
+                    const user = users.find((user) => user._id === userId);
+                    return <li key={userId}>{user?.name}</li>;
+                  })
+                ) : (
+                  <li>No users selected</li>
+                )}
+              </ul>
+            </div>
           </div>
+
           <div>
             <label
               className="block mb-2 font-semibold text-gray-700"
@@ -316,6 +437,7 @@ const AddTask = ({ setCards }) => {
               className="form-input border border-gray-300 rounded-md p-3 w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
           <div>
             <label
               className="block mb-2 font-semibold text-gray-700"
@@ -326,12 +448,28 @@ const AddTask = ({ setCards }) => {
             <input
               type="file"
               name="attachments"
-              value={addTask.attachments}
+              multiple
               onChange={handleInputChange}
               className="form-input border border-gray-300 rounded-md p-3 w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              multiple
             />
+
+            {/* Display selected attachments */}
+            <div className="mt-4">
+              <h4 className="font-semibold text-gray-600">
+                Selected Attachments:
+              </h4>
+              <ul>
+                {addTask.attachments?.length > 0 ? (
+                  addTask.attachments.map((file, index) => {
+                    return <li key={index}>{file.name}</li>;
+                  })
+                ) : (
+                  <li>No users selected</li>
+                )}
+              </ul>
+            </div>
           </div>
+
           <div className="col-span-2 md:col-span-2 lg:col-span-2">
             <label
               className="block mb-2 font-semibold text-gray-700"
@@ -341,6 +479,7 @@ const AddTask = ({ setCards }) => {
             </label>
             <div className="col-span-2">
               <ReactQuill
+                name={"description"}
                 value={addTask.description}
                 onChange={handleInputChange}
                 className="border border-gray-300 rounded-md shadow-sm"
@@ -361,7 +500,7 @@ const AddTask = ({ setCards }) => {
               htmlType="submit"
               className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
             >
-              Add Task
+              {editingTask ? "Edit Task" : "Add Task"}
             </Button>
           </div>
         </form>
