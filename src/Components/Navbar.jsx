@@ -1,5 +1,15 @@
-import React, { useState } from "react";
-import { Button, Dropdown, Menu, Avatar, message } from "antd";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import {
+  Button,
+  Dropdown,
+  Menu,
+  Avatar,
+  message,
+  Badge,
+  Modal,
+  List,
+} from "antd";
 import {
   MenuOutlined,
   CloseOutlined,
@@ -11,23 +21,43 @@ import {
   GlobalOutlined,
 } from "@ant-design/icons";
 
-const Navbar = ({ collapsed, setCollapsed, user, onLogout }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+import Notification from "./Notification.jsx";
+import { server } from "../main.jsx";
 
-  const toggleCollapsed = () => {
-    setCollapsed(!collapsed);
-  };
+const Navbar = ({ user, onLogout }) => {
+  // const [isDarkMode, setIsDarkMode] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
-  const handleModeSwitch = () => {
-    setIsDarkMode(!isDarkMode);
-    console.log(
-      isDarkMode ? "Switching to light mode" : "Switching to dark mode"
-    );
-  };
+  useEffect(() => {
+    const pollInterval = 5000; // every 5 seconds fetching notifications real time
+
+    const fetchNotifications = async () => {
+      const token = localStorage.getItem("authToken");
+
+      if (token) {
+        try {
+          const response = await axios.get(`${server}/users/getNotifications`, {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          });
+
+          setNotifications(response.data.notifications);
+        } catch (error) {
+          console.error("Error fetching notifications", error);
+        }
+      }
+    };
+
+    fetchNotifications();
+    const intervalId = setInterval(fetchNotifications, pollInterval);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken"); // Remove the token from local storage
-    onLogout(); // Call the logout handler passed from App component
+    localStorage.removeItem("authToken");
+    onLogout();
     message.success("Logout successful!");
   };
 
@@ -37,12 +67,6 @@ const Navbar = ({ collapsed, setCollapsed, user, onLogout }) => {
       <Menu.Item key="2">Spanish</Menu.Item>
       <Menu.Item key="3">French</Menu.Item>
       <Menu.Item key="4">German</Menu.Item>
-    </Menu>
-  );
-
-  const notificationMenu = (
-    <Menu>
-      <Menu.Item key="1">You have no new notifications</Menu.Item>
     </Menu>
   );
 
@@ -62,24 +86,9 @@ const Navbar = ({ collapsed, setCollapsed, user, onLogout }) => {
 
   return (
     <header className="flex items-center justify-between p-4 bg-white shadow-md sticky top-0 z-50">
-      {/* Toggle Button */}
-      {/* <Button type="link" onClick={toggleCollapsed}>
-        {collapsed ? <MenuOutlined style={{ fontSize: '1.5rem' }} /> : <CloseOutlined style={{ fontSize: '1.5rem' }} />}
-      </Button> */}
-
-      {/* Right Section: Notifications, Language, User Profile */}
       <div className="flex items-center space-x-4 ml-auto">
-        {/* Dark/Light Mode Button */}
-        {/* <Button type="link" onClick={handleModeSwitch} icon={isDarkMode ? <SunOutlined /> : <MoonOutlined />} /> */}
-
         {/* Notifications */}
-        <Dropdown
-          overlay={notificationMenu}
-          trigger={["click"]}
-          placement="bottomRight"
-        >
-          <Button type="link" icon={<BellOutlined />} />
-        </Dropdown>
+        <Notification notifications={notifications} />
 
         {/* Language Selector */}
         <Dropdown
@@ -99,7 +108,6 @@ const Navbar = ({ collapsed, setCollapsed, user, onLogout }) => {
           <div className="flex items-center">
             <Avatar size="large" icon={<UserOutlined />} />
             <span className="ml-2">{user ? user.name : "User"}</span>{" "}
-            {/* Show user name */}
           </div>
         </Dropdown>
       </div>

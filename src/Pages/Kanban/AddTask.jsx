@@ -232,7 +232,9 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
 
         console.log(response.data.savedTask);
 
-        setCards((prev) => [...prev, response.data.savedTask]);
+        // Re-fetch tasks after updating
+        const updatedTasks = await axios.get(`${server}/tasks`);
+        setCards(updatedTasks.data);
 
         setIsModalVisibleNew(false);
 
