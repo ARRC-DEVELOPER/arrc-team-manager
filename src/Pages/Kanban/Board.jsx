@@ -52,7 +52,7 @@ const Board = () => {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async () => { 
       await fetchTasks();
       await fetchStatuses();
     };

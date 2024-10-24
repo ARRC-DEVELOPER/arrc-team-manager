@@ -29,7 +29,7 @@ const Navbar = ({ user, onLogout }) => {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    const pollInterval = 5000; // every 5 seconds fetching notifications real time
+    const pollInterval = 5000; 
 
     const fetchNotifications = async () => {
       const token = localStorage.getItem("authToken");

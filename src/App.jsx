@@ -21,7 +21,6 @@ import Departments from "./Pages/Departments";
 import Clients from "./Pages/Clients";
 import Projects from "./Pages/Projects";
 import Tasks from "./Pages/Tasks";
-import Calendar from "./Pages/Calendar";
 import Reports from "./Pages/Reports";
 import Users from "./Pages/Users";
 import ArchivedUsers from "./Pages/ArchivedUsers";
@@ -41,6 +40,8 @@ import Settings from "./Pages/Settings/Settings";
 
 //subpages
 import SimpleTabs from "./Components/Subpage/SimpleTabs";
+import GoogleCallback from "./Pages/GoogleCallback";
+import CalendarPage from "./Pages/Calendar";
 
 const AppContent = ({
   isAuthenticated,
@@ -90,13 +91,17 @@ const AppContent = ({
             />
             {isAuthenticated ? (
               <>
+                <Route
+                  path="/auth/google/callback"
+                  element={<GoogleCallback onLogin={handleLogin} />}
+                />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/" element={<Navigate to="/dashboard" />} />
                 <Route path="/departments" element={<Departments />} />
                 <Route path="/clients" element={<Clients />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/tasks" element={<Tasks />} />
-                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/users" element={<Users />} />
                 <Route path="/archived-users" element={<ArchivedUsers />} />

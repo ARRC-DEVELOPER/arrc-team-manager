@@ -50,6 +50,7 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
           ? new Date(editingTask.dueDate).toISOString().split("T")[0]
           : "",
         tags: editingTask.tags ? editingTask.tags.join(", ") : "",
+        // attachments: editingTask.attachments || [],
       });
       setIsModalVisibleNew(true);
     }
@@ -58,21 +59,15 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const projectsResponse = await axios.get(
-          "https://task-manager-backend-btas.onrender.com/api/projects"
-        );
+        const projectsResponse = await axios.get(`${server}/projects`);
         setProjects(projectsResponse.data);
 
-        const usersResponse = await axios.get(
-          "https://task-manager-backend-btas.onrender.com/api/users"
-        );
+        const usersResponse = await axios.get(`${server}/users`);
         setUsers(usersResponse.data);
 
         const [statusesResponse, tasksResponse] = await Promise.all([
-          axios.get(
-            "https://task-manager-backend-btas.onrender.com/api/statuses"
-          ),
-          axios.get("https://task-manager-backend-btas.onrender.com/api/tasks"),
+          axios.get(`${server}/statuses`),
+          axios.get(`${server}/tasks`),
         ]);
 
         const statuses = statusesResponse.data;
@@ -128,22 +123,15 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
         return { ...prevData, assignedTo };
       });
     } else if (name === "attachments") {
-      const selectedFile = e.target.files[0];
-      console.log(selectedFile);
-
-      setTaskData((prevData) => {
-        const attachments = prevData.assignedTo.includes(selectedFile)
-          ? prevData.attachments.filter((id) => id !== selectedFile) // Remove if already selected
-          : [...prevData.attachments, selectedFile]; // Add if not selected
-        return { ...prevData, attachments };
-      });
-
-      setaddTask((prevData) => {
-        const attachments = prevData.assignedTo.includes(selectedFile)
-          ? prevData.attachments.filter((id) => id !== selectedFile) // Remove if already selected
-          : [...prevData.attachments, selectedFile]; // Add if not selected
-        return { ...prevData, attachments };
-      });
+      const selectedFiles = Array.from(e.target.files);
+      setTaskData((prevData) => ({
+        ...prevData,
+        attachments: [...prevData.attachments, ...selectedFiles],
+      }));
+      setaddTask((prevData) => ({
+        ...prevData,
+        attachments: [...prevData.attachments, ...selectedFiles],
+      }));
     } else if (name === "dueDate") {
       console.log(value);
       setTaskData((prevData) => ({ ...prevData, dueDate: value }));
@@ -462,11 +450,11 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
               </h4>
               <ul>
                 {addTask.attachments?.length > 0 ? (
-                  addTask.attachments.map((file, index) => {
-                    return <li key={index}>{file.name}</li>;
-                  })
+                  addTask.attachments.map((file, index) => (
+                    <li key={index}>{file.name}</li>
+                  ))
                 ) : (
-                  <li>No users selected</li>
+                  <li>No attachments selected</li>
                 )}
               </ul>
             </div>
@@ -483,7 +471,9 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
               <ReactQuill
                 name={"description"}
                 value={addTask.description}
-                onChange={handleInputChange}
+                onChange={(value) =>
+                  handleInputChange({ target: { name: "description", value } })
+                }
                 className="border border-gray-300 rounded-md shadow-sm"
                 theme="snow"
               />
