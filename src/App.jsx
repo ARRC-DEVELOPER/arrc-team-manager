@@ -42,6 +42,7 @@ import Settings from "./Pages/Settings/Settings";
 import SimpleTabs from "./Components/Subpage/SimpleTabs";
 import GoogleCallback from "./Pages/GoogleCallback";
 import CalendarPage from "./Pages/Calendar";
+import UserDetails from "./Pages/UserDetails";
 
 const AppContent = ({
   isAuthenticated,
@@ -104,6 +105,7 @@ const AppContent = ({
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/users" element={<Users />} />
+                <Route path="/user" element={<UserDetails />} />
                 <Route path="/archived-users" element={<ArchivedUsers />} />
                 <Route path="/roles" element={<Roles />} />
                 <Route path="/sales" element={<Sales />} />
