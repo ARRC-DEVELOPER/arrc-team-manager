@@ -12,6 +12,7 @@ import {
 } from "antd";
 import axios from "axios";
 import { server } from "../main";
+import { useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
@@ -23,6 +24,8 @@ const Users = () => {
   const [roles, setRoles] = useState([]);
   const [projects, setProjects] = useState([]);
   const [file, setFile] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUsers();
@@ -88,7 +91,7 @@ const Users = () => {
     if (file) {
       formData.append("profilePicture", file);
     } else {
-      console.warn("No file selected to upload."); 
+      console.warn("No file selected to upload.");
     }
 
     console.log(formData);
@@ -149,7 +152,7 @@ const Users = () => {
     if (files && files[0]) {
       setFile(files[0]);
     } else {
-      setFile(null); 
+      setFile(null);
     }
   };
 
@@ -160,7 +163,7 @@ const Users = () => {
 
   const getProjectName = (projectId) => {
     const project = projects.find((p) => p._id === projectId);
-    return project ? project.name : "Unknown Project"; 
+    return project ? project.name : "Unknown Project";
   };
 
   return (
@@ -183,7 +186,8 @@ const Users = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredUsers.map((user) => (
           <div
-            className="bg-white shadow-md rounded-lg overflow-hidden user-card-view hover:shadow-lg transition-shadow duration-300 ease-in-out"
+            onClick={() => navigate(`/user/${user._id}`)}
+            className="bg-white cursor-pointer shadow-md rounded-lg overflow-hidden user-card-view hover:shadow-lg transition-shadow duration-300 ease-in-out"
             key={user._id}
           >
             <div className="flex items-center p-4 border-b">

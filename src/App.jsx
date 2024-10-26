@@ -105,7 +105,7 @@ const AppContent = ({
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/users" element={<Users />} />
-                <Route path="/user" element={<UserDetails />} />
+                <Route path="/user/:userId" element={<UserDetails />} />
                 <Route path="/archived-users" element={<ArchivedUsers />} />
                 <Route path="/roles" element={<Roles />} />
                 <Route path="/sales" element={<Sales />} />

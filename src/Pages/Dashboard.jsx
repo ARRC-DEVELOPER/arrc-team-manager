@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Bar, Doughnut, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -14,6 +14,8 @@ import {
 } from "chart.js";
 import "tailwindcss/tailwind.css";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { server } from "../main";
 
 ChartJS.register(
   CategoryScale,
@@ -28,7 +30,42 @@ ChartJS.register(
 );
 
 const Dashboard = () => {
+  const [overallStats, setOverAllStats] = useState();
+  const [recentActivities, setRecentActivities] = useState();
+  const [loading, setLoading] = useState();
   const navigate = useNavigate();
+
+  console.log(recentActivities);
+
+  useEffect(() => {
+    fetchOverAllStats();
+    fetchRecentAcitivities();
+  }, []);
+
+  const fetchOverAllStats = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${server}/stats/getOverallStats`);
+      setOverAllStats(response.data.stats);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      message.error("Failed to fetch overallstats");
+    }
+  };
+
+  const fetchRecentAcitivities = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${server}/stats/recent-activities`);
+      setRecentActivities(response.data);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      message.error("Failed to fetch recent activities");
+    }
+  };
+
   const barData = {
     labels: ["User A", "User B", "User C", "User D"],
     datasets: [
@@ -57,7 +94,11 @@ const Dashboard = () => {
     labels: ["High", "Medium", "Low"],
     datasets: [
       {
-        data: [6, 10, 4],
+        data: [
+          (overallStats && overallStats.priorityCounts.high) || 0,
+          (overallStats && overallStats.priorityCounts.medium) || 0,
+          (overallStats && overallStats.priorityCounts.low) || 0,
+        ],
         backgroundColor: ["#F44336", "#FFEB3B", "#4CAF50"],
         hoverBackgroundColor: ["#FF6384", "#FFCE56", "#36A2EB"],
       },
@@ -106,6 +147,10 @@ const Dashboard = () => {
     navigate("/tasks-data");
   };
 
+  if ((loading, !overallStats)) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Header */}
@@ -126,19 +171,27 @@ const Dashboard = () => {
         {/* Summary Cards */}
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-bold">Total Tasks</h2>
-          <p className="text-4xl font-semibold mt-2">45</p>
+          <p className="text-4xl font-semibold mt-2">
+            {overallStats.totalTasks}
+          </p>
         </div>
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-bold">Completed Tasks</h2>
-          <p className="text-4xl font-semibold mt-2">12</p>
+          <p className="text-4xl font-semibold mt-2">
+            {overallStats.completedTasks}
+          </p>
         </div>
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-bold">Pending Tasks</h2>
-          <p className="text-4xl font-semibold mt-2">8</p>
+          <p className="text-4xl font-semibold mt-2">
+            {overallStats.pendingTasks}
+          </p>
         </div>
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-bold">Overdue Tasks</h2>
-          <p className="text-4xl font-semibold mt-2">2</p>
+          <p className="text-4xl font-semibold mt-2">
+            {overallStats.overdueTasks}
+          </p>
         </div>
       </div>
 
@@ -167,18 +220,13 @@ const Dashboard = () => {
       <div className="mt-6 bg-white p-4 rounded shadow">
         <h3 className="text-lg font-bold mb-4">Recent Activities</h3>
         <ul className="space-y-2">
-          <li className="flex justify-between">
-            <span>Task 1 - Completed</span>
-            <span className="text-sm text-gray-500">2 hours ago</span>
-          </li>
-          <li className="flex justify-between">
-            <span>Task 2 - Assigned to User A</span>
-            <span className="text-sm text-gray-500">4 hours ago</span>
-          </li>
-          <li className="flex justify-between">
-            <span>Task 3 - Overdue</span>
-            <span className="text-sm text-gray-500">1 day ago</span>
-          </li>
+          {recentActivities &&
+            recentActivities.map((item, index) => (
+              <li className="flex justify-between">
+                <span>{item.message}</span>
+                <span className="text-sm text-gray-500">{item.timeAgo}</span>
+              </li>
+            ))}
         </ul>
       </div>
     </div>
