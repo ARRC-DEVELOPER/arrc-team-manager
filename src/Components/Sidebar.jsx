@@ -5,7 +5,7 @@ import {
   MdSettings,
   MdTaskAlt,
 } from "react-icons/md";
-import { FaTasks, FaTrashAlt, FaUsers } from "react-icons/fa";
+import { FaTasks, FaTicketAlt, FaTrashAlt, FaUsers } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { Layout, Menu, Button } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
@@ -85,6 +85,13 @@ const linkData = [
     label: "Users",
     to: "/users",
     permission: "Manage Users",
+  },
+  {
+    key: "tickets",
+    icon: <FaTicketAlt style={{ color: "#13c2c2" }} />,
+    label: "Tikckets",
+    to: "/tickets",
+    permission: "Manage Tickets",
   },
   {
     key: "archived-users",

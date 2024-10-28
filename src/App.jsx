@@ -33,7 +33,6 @@ import Trash from "./Pages/Trash";
 import Login from "./Login/login";
 import Tags from "./Pages/Settings/Tags";
 import Status from "./Components/Subpage/Tasks/Status";
-import SubTasks from "../src/Components/Subpage/Tasks/SubTasks";
 import ActivityTypes from "./Pages/Settings/ActivityTypes";
 import Taxes from "./Pages/Settings/Taxes";
 import Settings from "./Pages/Settings/Settings";
@@ -43,6 +42,8 @@ import SimpleTabs from "./Components/Subpage/SimpleTabs";
 import GoogleCallback from "./Pages/GoogleCallback";
 import CalendarPage from "./Pages/Calendar";
 import UserDetails from "./Pages/UserDetails";
+import TicketForm from "./Pages/Ticket/TicketForm";
+import TicketList from "./Pages/Ticket/Tickets";
 
 const AppContent = ({
   isAuthenticated,
@@ -104,6 +105,14 @@ const AppContent = ({
                 <Route path="/tasks" element={<Tasks />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/reports" element={<Reports />} />
+
+                {loggedInUser.role.name === "Admin" ||
+                loggedInUser.role.name === "Manager" ? (
+                  <Route path="/tickets" element={<TicketList />} />
+                ) : (
+                  <Route path="/tickets" element={<TicketForm />} />
+                )}
+
                 <Route path="/users" element={<Users />} />
                 <Route path="/user/:userId" element={<UserDetails />} />
                 <Route path="/archived-users" element={<ArchivedUsers />} />
