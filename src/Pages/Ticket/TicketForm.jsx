@@ -1,38 +1,70 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { server } from "../../main";
+import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 
-function TicketForm({ onSubmit }) {
+function TicketForm() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("software");
+  // const [category, setCategory] = useState("software");
   const [attachments, setAttachments] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tickets, setTickets] = useState([]);
+  const token = localStorage.getItem("authToken");
 
   const handleFileChange = (e) => {
     setAttachments([...e.target.files]);
   };
 
-  const handleSubmit = () => {
-    const ticketData = { title, description, category, attachments };
-    onSubmit(ticketData);
-    setIsModalOpen(false);
+  const fetchTickets = async () => {
+    try {
+      const response = await axios.get(`${server}/tickets/getEmployeeTickets`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setTickets(response.data);
+    } catch (error) {
+      console.error("Error fetching tickets:", error);
+    }
   };
 
-  const tickets = [
-    {
-      title: "Ticket 1",
-      description: "Description of Ticket 1",
-      category: "Software",
-      status: "Completed",
-      _id: "1",
-    },
-    {
-      title: "Ticket 2",
-      description: "Description of Ticket 2",
-      category: "Hardware",
-      status: "In Progress",
-      _id: "2",
-    },
-  ];
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const handleSubmit = async () => {
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    // formData.append("category", category);
+    attachments.forEach((file) => formData.append("attachments", file));
+
+    try {
+      const response = await axios.post(
+        `${server}/tickets/raiseTicket`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+            withCredentials: true,
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        console.log("Ticket raised successfully:", response.data);
+        setIsModalOpen(false);
+        toast.success("Task added successfully!");
+      } else {
+        console.error("Failed to raise ticket");
+      }
+    } catch (error) {
+      console.error("Error raising ticket:", error);
+    }
+  };
 
   return (
     <div className="relative p-4">
@@ -61,14 +93,14 @@ function TicketForm({ onSubmit }) {
               placeholder="Description"
               className="mt-2 border p-2 rounded w-full"
             ></textarea>
-            <select
+            {/* <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="mt-2 border p-2 rounded w-full"
             >
               <option value="software">Software</option>
               <option value="hardware">Hardware</option>
-            </select>
+            </select> */}
             <input
               type="file"
               onChange={handleFileChange}
@@ -105,7 +137,7 @@ function TicketForm({ onSubmit }) {
               <div>
                 <h3 className="text-lg font-medium">{ticket.title}</h3>
                 <p className="text-sm text-gray-600">{ticket.description}</p>
-                <span
+                {/* <span
                   className={`text-sm mt-1 inline-block ${
                     ticket.status === "Completed"
                       ? "text-green-500"
@@ -115,17 +147,17 @@ function TicketForm({ onSubmit }) {
                   }`}
                 >
                   {ticket.status}
-                </span>
+                </span> */}
               </div>
               <div>
                 <span
                   className={`p-2 text-xs rounded-full ${
-                    ticket.category === "software"
-                      ? "bg-blue-100 text-blue-500"
+                    ticket.status === "Resolved"
+                      ? "bg-green-100 text-blue-500"
                       : "bg-purple-100 text-purple-500"
                   }`}
                 >
-                  {ticket.category}
+                  {ticket.status}
                 </span>
               </div>
             </li>

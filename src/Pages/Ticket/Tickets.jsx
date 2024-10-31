@@ -1,29 +1,63 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { server } from "../../main";
 
-function TicketList({ tickets, onUpdateStatus, onAddComment }) {
+function TicketList() {
   const [comments, setComments] = useState({});
-  tickets = tickets || [
-    {
-      title: "Sample Ticket",
-      category: "Software",
-      status: "Open",
-      _id: "jlkdsjfjjjdfkj",
-    },
-    {
-      title: "Sample Ticket",
-      category: "Software",
-      status: "Open",
-      _id: "jlkdsjfjjjdfkj",
-    },
-  ];
+  const [tickets, setTickets] = useState([]);
+  const token = localStorage.getItem("authToken");
+
+  const fetchTickets = async () => {
+    try {
+      const response = await axios.get(`${server}/tickets/getManagerTickets`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setTickets(response.data);
+    } catch (error) {
+      console.error("Error fetching tickets:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
 
   const handleCommentChange = (e, id) => {
     setComments({ ...comments, [id]: e.target.value });
   };
 
+  const updateTicket = async (id, status = null, comment = null) => {
+    try {
+      const response = await axios.put(
+        `${server}/tickets/reviewTicket/${id}`,
+        { status, comment },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Update the specific ticket in the state directly
+      setTickets((prevTickets) =>
+        prevTickets.map((ticket) =>
+          ticket._id === id ? { ...ticket, ...response.data.ticket } : ticket
+        )
+      );
+      setComments({ ...comments, [id]: "" }); // Clear comment input for this ticket
+    } catch (error) {
+      console.error("Error updating ticket:", error);
+    }
+  };
+
   const handleAddComment = (id) => {
-    onAddComment(id, comments[id]);
-    setComments({ ...comments, [id]: "" });
+    updateTicket(id, null, comments[id]);
+  };
+
+  const handleStatusUpdate = (id, status) => {
+    updateTicket(id, status, comments[id] || null); // Optional: send comment if it exists
   };
 
   return (
@@ -71,13 +105,15 @@ function TicketList({ tickets, onUpdateStatus, onAddComment }) {
                 </td>
                 <td className="py-3 px-6 text-center">
                   <button
-                    onClick={() => onUpdateStatus(ticket._id, "In Progress")}
+                    onClick={() =>
+                      handleStatusUpdate(ticket._id, "In Progress")
+                    }
                     className="bg-yellow-400 text-white py-1 px-3 rounded-lg hover:bg-yellow-500 mr-2 transition"
                   >
                     In Progress
                   </button>
                   <button
-                    onClick={() => onUpdateStatus(ticket._id, "Resolved")}
+                    onClick={() => handleStatusUpdate(ticket._id, "Resolved")}
                     className="bg-green-500 text-white py-1 px-3 rounded-lg hover:bg-green-600 transition"
                   >
                     Resolved
