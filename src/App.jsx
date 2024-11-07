@@ -150,6 +150,70 @@ const App = () => {
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  async function fetchVapidPublicKey() {
+    try {
+      const response = await axios.get(`${server}/auth/getVapidPublicKey`);
+      if (response.data.success) {
+        return response.data.publicKey;
+      } else {
+        console.error("Failed to fetch VAPID public key");
+      }
+    } catch (error) {
+      console.error("Error fetching VAPID public key:", error);
+    }
+  }
+
+  async function subscribeUser() {
+    if ("serviceWorker" in navigator && "PushManager" in window) {
+      try {
+        const publicKey = await fetchVapidPublicKey();
+
+        if (!publicKey) {
+          console.error("No VAPID public key available");
+          return;
+        }
+
+        // Register the service worker and subscribe the user
+        const registration = await navigator.serviceWorker.register("/sw.js");
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
+
+        const token = localStorage.getItem("authToken");
+        // Send the subscription to the server using Axios
+        await axios.post(
+          `${server}/auth/subscribe`,
+          { subscription },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              withCredentials: true,
+            },
+          }
+        );
+
+        console.log("User is subscribed for push notifications");
+      } catch (error) {
+        console.error("Failed to subscribe the user:", error);
+      }
+    }
+  }
+
+  // Helper function to convert VAPID key from Base64 to Uint8Array
+  function urlBase64ToUint8Array(base64String) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
   const loadUser = async () => {
     const token = localStorage.getItem("authToken");
 
@@ -181,6 +245,7 @@ const App = () => {
   const handleLogin = (user) => {
     setIsAuthenticated(true);
     setLoggedInUser(user);
+    subscribeUser();
   };
 
   const handleLogout = () => {
