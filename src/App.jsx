@@ -37,7 +37,7 @@ import ActivityTypes from "./Pages/Settings/ActivityTypes";
 import Taxes from "./Pages/Settings/Taxes";
 import Settings from "./Pages/Settings/Settings";
 
-//subpages
+// Subpages
 import SimpleTabs from "./Components/Subpage/SimpleTabs";
 import GoogleCallback from "./Pages/GoogleCallback";
 import CalendarPage from "./Pages/Calendar";
@@ -173,7 +173,6 @@ const App = () => {
           return;
         }
 
-        // Register the service worker and subscribe the user
         const registration = await navigator.serviceWorker.register("/sw.js");
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
@@ -181,7 +180,6 @@ const App = () => {
         });
 
         const token = localStorage.getItem("authToken");
-        // Send the subscription to the server using Axios
         await axios.post(
           `${server}/auth/subscribe`,
           { subscription },
@@ -200,7 +198,6 @@ const App = () => {
     }
   }
 
-  // Helper function to convert VAPID key from Base64 to Uint8Array
   function urlBase64ToUint8Array(base64String) {
     const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding)
