@@ -44,6 +44,7 @@ import CalendarPage from "./Pages/Calendar";
 import UserDetails from "./Pages/UserDetails";
 import TicketForm from "./Pages/Ticket/TicketForm";
 import TicketList from "./Pages/Ticket/Tickets";
+import TicketHistory from "./Pages/Ticket/TicketHistory";
 
 const AppContent = ({
   isAuthenticated,
@@ -57,10 +58,12 @@ const AppContent = ({
 
   useEffect(() => {
     if (!isLoading) {
-      const lastPath = localStorage.getItem("lastPath");
-
       if (isAuthenticated) {
-        if (lastPath && lastPath !== "/login") {
+        const lastPath = localStorage.getItem("lastPath");
+
+        if (loggedInUser?.role?.name === "User") {
+          navigate("/tasks");
+        } else if (lastPath && lastPath !== "/login" && lastPath !== "/") {
           navigate(lastPath);
         } else {
           navigate("/dashboard");
@@ -113,6 +116,7 @@ const AppContent = ({
                   <Route path="/tickets" element={<TicketForm />} />
                 )}
 
+                <Route path="/ticket-history" element={<TicketHistory />} />
                 <Route path="/users" element={<Users />} />
                 <Route path="/user/:userId" element={<UserDetails />} />
                 <Route path="/archived-users" element={<ArchivedUsers />} />

@@ -3,6 +3,7 @@ import axios from "axios";
 import { server } from "../../main";
 import "react-toastify/dist/ReactToastify.css";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 function TicketForm() {
   const [title, setTitle] = useState("");
@@ -12,6 +13,7 @@ function TicketForm() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tickets, setTickets] = useState([]);
   const token = localStorage.getItem("authToken");
+  const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     setAttachments([...e.target.files]);
@@ -57,6 +59,7 @@ function TicketForm() {
       if (response.status === 201) {
         console.log("Ticket raised successfully:", response.data);
         setIsModalOpen(false);
+        fetchTickets();
         toast.success("Task added successfully!");
       } else {
         console.error("Failed to raise ticket");
@@ -64,6 +67,10 @@ function TicketForm() {
     } catch (error) {
       console.error("Error raising ticket:", error);
     }
+  };
+
+  const handleHistoryClick = () => {
+    navigate("/ticket-history");
   };
 
   return (
@@ -75,6 +82,15 @@ function TicketForm() {
       >
         + Raise Ticket
       </button>
+
+      <div className="space-x-2">
+        <button
+          onClick={handleHistoryClick}
+          className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition"
+        >
+          History
+        </button>
+      </div>
 
       {/* Modal for Ticket Form */}
       {isModalOpen && (

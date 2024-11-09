@@ -1,11 +1,13 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { server } from "../../main";
+import { useNavigate } from "react-router-dom";
 
 function TicketList() {
   const [comments, setComments] = useState({});
   const [tickets, setTickets] = useState([]);
   const token = localStorage.getItem("authToken");
+  const navigate = useNavigate();
 
   const fetchTickets = async () => {
     try {
@@ -22,6 +24,12 @@ function TicketList() {
 
   useEffect(() => {
     fetchTickets();
+
+    // Set up a periodic refresh every 10 minutes
+    const interval = setInterval(fetchTickets, 10 * 60 * 1000);
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(interval);
   }, []);
 
   const handleCommentChange = (e, id) => {
@@ -40,13 +48,12 @@ function TicketList() {
         }
       );
 
-      // Update the specific ticket in the state directly
       setTickets((prevTickets) =>
         prevTickets.map((ticket) =>
           ticket._id === id ? { ...ticket, ...response.data.ticket } : ticket
         )
       );
-      setComments({ ...comments, [id]: "" }); // Clear comment input for this ticket
+      setComments({ ...comments, [id]: "" });
     } catch (error) {
       console.error("Error updating ticket:", error);
     }
@@ -57,12 +64,30 @@ function TicketList() {
   };
 
   const handleStatusUpdate = (id, status) => {
-    updateTicket(id, status, comments[id] || null); // Optional: send comment if it exists
+    updateTicket(id, status, comments[id] || null);
   };
+
+  const handleHistoryClick = () => {
+    navigate("/ticket-history");
+  };
+
+  // Filter tickets to only show those that are not yet in history
+  const activeTickets = tickets.filter((ticket) => !ticket.history);
 
   return (
     <div className="p-4 bg-gray-100 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-semibold mb-4 text-gray-800">Ticket List</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold text-gray-800">Ticket List</h2>
+        <div className="space-x-2">
+          <button
+            onClick={handleHistoryClick}
+            className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition"
+          >
+            History
+          </button>
+        </div>
+      </div>
+
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white rounded-lg shadow-md">
           <thead>
@@ -75,7 +100,7 @@ function TicketList() {
             </tr>
           </thead>
           <tbody className="text-gray-600 text-sm font-light">
-            {tickets.map((ticket) => (
+            {activeTickets.map((ticket) => (
               <tr
                 key={ticket._id}
                 className={`border-b border-gray-200 hover:bg-gray-100 transition duration-200 ${

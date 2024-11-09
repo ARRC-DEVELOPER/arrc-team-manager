@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { server } from "../../main";
 
 const Tags = () => {
   const [tags, setTags] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [newTag, setNewTag] = useState({ name: '' });
-  const [bulkTags, setBulkTags] = useState(''); // New state for bulk tags input
+  const [newTag, setNewTag] = useState({ name: "" });
+  const [bulkTags, setBulkTags] = useState(""); // New state for bulk tags input
   const [showForm, setShowForm] = useState(false);
   const [showBulkForm, setShowBulkForm] = useState(false); // State to show bulk form
   const [isEditing, setIsEditing] = useState(false);
@@ -22,14 +23,14 @@ const Tags = () => {
       try {
         setLoading(true); // Start shimmer effect
 
-        const response = await axios.get('https://task-manager-backend-btas.onrender.com/api/tags');
+        const response = await axios.get(`${server}/tags`);
         if (Array.isArray(response.data)) {
           setTags(response.data);
         } else {
-          console.error('Invalid data format received:', response.data);
+          console.error("Invalid data format received:", response.data);
         }
       } catch (error) {
-        console.error('Error fetching tags:', error);
+        console.error("Error fetching tags:", error);
       } finally {
         setLoading(false); // End shimmer effect
       }
@@ -37,7 +38,7 @@ const Tags = () => {
     fetchTags();
   }, []);
 
-  const filteredTags = tags.filter(tag =>
+  const filteredTags = tags.filter((tag) =>
     tag.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -58,12 +59,12 @@ const Tags = () => {
   };
 
   const handleDeleteClick = async (id) => {
-    if (window.confirm('Are you sure you want to delete this tag?')) {
+    if (window.confirm("Are you sure you want to delete this tag?")) {
       try {
-        await axios.delete(`https://task-manager-backend-btas.onrender.com/api/tags/${id}`);
-        setTags(tags.filter(tag => tag._id !== id));
+        await axios.delete(`${server}/tags/${id}`);
+        setTags(tags.filter((tag) => tag._id !== id));
       } catch (error) {
-        console.error('Error deleting tag:', error);
+        console.error("Error deleting tag:", error);
       }
     }
   };
@@ -89,32 +90,41 @@ const Tags = () => {
     e.preventDefault();
     try {
       if (isEditing) {
-        await axios.put(`https://task-manager-backend-btas.onrender.com/api/tags/${editId}`, newTag);
-        setTags(tags.map((tag) => (tag._id === editId ? { ...tag, ...newTag } : tag)));
+        await axios.put(`${server}/tags/${editId}`, newTag);
+        setTags(
+          tags.map((tag) => (tag._id === editId ? { ...tag, ...newTag } : tag))
+        );
       } else {
-        const response = await axios.post('https://task-manager-backend-btas.onrender.com/api/tags', newTag);
+        const response = await axios.post(`${server}/tags`, newTag);
         setTags([...tags, response.data]);
       }
 
-      setNewTag({ name: '' });
+      setNewTag({ name: "" });
       setShowForm(false);
       setIsEditing(false);
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error("Error submitting form:", error);
     }
   };
 
   const handleBulkSubmit = async (e) => {
     e.preventDefault();
-    const tagsArray = bulkTags.split(',').map(tag => tag.trim()).filter(tag => tag);
+    const tagsArray = bulkTags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag);
     try {
-      const promises = tagsArray.map(tag => axios.post('https://task-manager-backend-btas.onrender.com/api/tags', { name: tag }));
+      const promises = tagsArray.map((tag) =>
+        axios.post(`${server}/tags`, {
+          name: tag,
+        })
+      );
       const responses = await Promise.all(promises);
-      setTags([...tags, ...responses.map(res => res.data)]);
-      setBulkTags(''); // Clear the bulk input after submission
+      setTags([...tags, ...responses.map((res) => res.data)]);
+      setBulkTags(""); // Clear the bulk input after submission
       setShowBulkForm(false); // Close the bulk form after submission
     } catch (error) {
-      console.error('Error submitting bulk tags:', error);
+      console.error("Error submitting bulk tags:", error);
     }
   };
 
@@ -124,10 +134,16 @@ const Tags = () => {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold">Tags</h1>
           <div>
-            <button onClick={() => setShowForm(true)} className="px-4 py-2 bg-blue-600 text-white rounded mr-2">
+            <button
+              onClick={() => setShowForm(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded mr-2"
+            >
               New Tag +
             </button>
-            <button onClick={() => setShowBulkForm(true)} className="px-4 py-2 bg-green-600 text-white rounded">
+            <button
+              onClick={() => setShowBulkForm(true)}
+              className="px-4 py-2 bg-green-600 text-white rounded"
+            >
               Bulk Tag
             </button>
           </div>
@@ -139,7 +155,9 @@ const Tags = () => {
             <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
               <h2 className="text-lg font-bold mb-4">Add Bulk Tags</h2>
               <form onSubmit={handleBulkSubmit}>
-                <label className="block mb-1">Bulk Tags (comma-separated):</label>
+                <label className="block mb-1">
+                  Bulk Tags (comma-separated):
+                </label>
                 <input
                   type="text"
                   value={bulkTags}
@@ -148,10 +166,17 @@ const Tags = () => {
                   placeholder="Tag1, Tag2, Tag3..."
                 />
                 <div className="flex justify-between">
-                  <button type="button" onClick={() => setShowBulkForm(false)} className="px-4 py-2 border border-gray-300 rounded">
+                  <button
+                    type="button"
+                    onClick={() => setShowBulkForm(false)}
+                    className="px-4 py-2 border border-gray-300 rounded"
+                  >
                     Cancel
                   </button>
-                  <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded">
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-green-600 text-white rounded"
+                  >
                     Add Bulk Tags
                   </button>
                 </div>
@@ -163,7 +188,9 @@ const Tags = () => {
         {showForm && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
-              <h2 className="text-lg font-bold mb-4">{isEditing ? 'Edit Tag' : 'Add New Tag'}</h2>
+              <h2 className="text-lg font-bold mb-4">
+                {isEditing ? "Edit Tag" : "Add New Tag"}
+              </h2>
               <form onSubmit={handleFormSubmit}>
                 <div className="mb-2">
                   <label className="block mb-1">Tag Name:*</label>
@@ -177,11 +204,18 @@ const Tags = () => {
                   />
                 </div>
                 <div className="flex justify-between">
-                  <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 border border-gray-300 rounded">
+                  <button
+                    type="button"
+                    onClick={() => setShowForm(false)}
+                    className="px-4 py-2 border border-gray-300 rounded"
+                  >
                     Cancel
                   </button>
-                  <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
-                    {isEditing ? 'Update Tag' : 'Add Tag'}
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded"
+                  >
+                    {isEditing ? "Update Tag" : "Add Tag"}
                   </button>
                 </div>
               </form>
@@ -208,7 +242,10 @@ const Tags = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {currentTags.map((tag, index) => (
-              <div key={index} className="relative bg-white p-6 mt-3 border rounded shadow-md hover:shadow-lg transition-shadow duration-300">
+              <div
+                key={index}
+                className="relative bg-white p-6 mt-3 border rounded shadow-md hover:shadow-lg transition-shadow duration-300"
+              >
                 <div className="absolute top-2 right-2">
                   <button onClick={() => handleEllipsisClick(index)}>
                     &#x22EE;
@@ -240,7 +277,10 @@ const Tags = () => {
 
         <div className="mt-4 flex justify-end w-full">
           {currentPage > 1 && (
-            <button onClick={() => handlePageChange(currentPage - 1)} className="px-3 py-2 mx-1 border rounded border-gray-300 hover:bg-gray-100">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              className="px-3 py-2 mx-1 border rounded border-gray-300 hover:bg-gray-100"
+            >
               Previous
             </button>
           )}
@@ -249,21 +289,28 @@ const Tags = () => {
               key={index}
               onClick={() => handlePageChange(index + 1)}
               className={`px-3 py-2 mx-1 border rounded ${
-                currentPage === index + 1 ? 'bg-blue-600 text-white' : 'border-gray-300 hover:bg-gray-100'
+                currentPage === index + 1
+                  ? "bg-blue-600 text-white"
+                  : "border-gray-300 hover:bg-gray-100"
               }`}
             >
               {index + 1}
             </button>
           ))}
           {currentPage < totalPages && (
-            <button onClick={() => handlePageChange(currentPage + 1)} className="px-3 py-2 mx-1 border rounded border-gray-300 hover:bg-gray-100">
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              className="px-3 py-2 mx-1 border rounded border-gray-300 hover:bg-gray-100"
+            >
               Next
             </button>
           )}
         </div>
 
         <p className="mt-4">
-          Showing {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredTags.length)} of {filteredTags.length}
+          Showing {startIndex + 1} -{" "}
+          {Math.min(startIndex + itemsPerPage, filteredTags.length)} of{" "}
+          {filteredTags.length}
         </p>
       </div>
     </>

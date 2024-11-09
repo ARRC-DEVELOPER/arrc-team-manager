@@ -1,10 +1,26 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Modal, Button, Form, Input, Select, message, Card, Progress, Avatar, Pagination } from "antd";
-import { EllipsisOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+  Modal,
+  Button,
+  Form,
+  Input,
+  Select,
+  message,
+  Card,
+  Progress,
+  Avatar,
+  Pagination,
+} from "antd";
+import {
+  EllipsisOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
 import ReactQuill from "react-quill"; // Import ReactQuill for the description field
 import "react-quill/dist/quill.snow.css"; // Import styles for ReactQuill
 import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
+import { server } from "../main";
 
 const { Option } = Select;
 
@@ -27,7 +43,7 @@ const Projects = () => {
 
   const fetchProjects = async () => {
     try {
-      const response = await axios.get("https://task-manager-backend-btas.onrender.com/api/projects");
+      const response = await axios.get(`${server}/projects`);
       setProjects(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -37,7 +53,7 @@ const Projects = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("https://task-manager-backend-btas.onrender.com/api/users");
+      const response = await axios.get(`${server}/users`);
       setUsers(response.data); // Assuming response.data is an array of users
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -77,24 +93,26 @@ const Projects = () => {
     try {
       const values = await form.validateFields();
       if (isEditing) {
-        await axios.put(`https://task-manager-backend-btas.onrender.com/api/projects/${currentProjectId}`, values);
+        await axios.put(`${server}/projects/${currentProjectId}`, values);
         message.success("Project updated successfully");
       } else {
-        await axios.post("https://task-manager-backend-btas.onrender.com/api/projects", values);
+        await axios.post(`${server}/projects`, values);
         message.success("Project added successfully");
       }
       fetchProjects(); // Refresh project list
       handleCancel();
     } catch (error) {
       console.error("Error saving project:", error);
-      message.error(isEditing ? "Failed to update project" : "Failed to add project");
+      message.error(
+        isEditing ? "Failed to update project" : "Failed to add project"
+      );
     }
   };
 
   // Delete a project
   const deleteProject = async (projectId) => {
     try {
-      await axios.delete(`https://task-manager-backend-btas.onrender.com/api/projects/${projectId}`);
+      await axios.delete(`${server}/projects/${projectId}`);
       message.success("Project deleted successfully");
       fetchProjects(); // Refresh project list
     } catch (error) {
@@ -109,8 +127,10 @@ const Projects = () => {
   };
 
   // Paginate the projects to display
-  const paginatedProjects = projects.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-
+  const paginatedProjects = projects.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const handleProjectClick = () => {
     navigate("/simpletab"); // Navigate to /simpletab
@@ -126,10 +146,13 @@ const Projects = () => {
   <Button type="primary" className="mb-4" onClick={() => showModal()}>
     New Project
   </Button>
-</div> */} 
-<div className="flex justify-between items-center mb-4">
+</div> */}
+      <div className="flex justify-between items-center mb-4">
         <h1 className="text-3xl font-bold">Projects</h1>
-        <button onClick={() => showModal()} className="px-4 py-2 bg-blue-600 text-white rounded">
+        <button
+          onClick={() => showModal()}
+          className="px-4 py-2 bg-blue-600 text-white rounded"
+        >
           New Projects +
         </button>
       </div>
@@ -143,14 +166,20 @@ const Projects = () => {
               title={
                 <div className="flex justify-between items-center">
                   <span>{project.prefix}</span>
-                  <span className="text-primary cursor-pointer" onClick={handleProjectClick}>
+                  <span
+                    className="text-primary cursor-pointer"
+                    onClick={handleProjectClick}
+                  >
                     {project.name}
                   </span>
                 </div>
               }
               actions={[
                 <EditOutlined key="edit" onClick={() => showModal(project)} />,
-                <DeleteOutlined key="delete" onClick={() => deleteProject(project._id)} />,
+                <DeleteOutlined
+                  key="delete"
+                  onClick={() => deleteProject(project._id)}
+                />,
                 <EllipsisOutlined key="ellipsis" />,
               ]}
             >
@@ -161,7 +190,9 @@ const Projects = () => {
                   showInfo={false}
                   strokeColor={project.color || "#3F51B5"}
                 />
-                <span className="text-gray-500">{project.progressPercentage || 0}%</span>
+                <span className="text-gray-500">
+                  {project.progressPercentage || 0}%
+                </span>
               </div>
 
               <p className="mb-1">
@@ -174,13 +205,14 @@ const Projects = () => {
               <div className="flex justify-between items-center">
                 <span>Client: {project.client}</span>
                 <div className="flex space-x-2">
-                  {Array.isArray(project.assignees) && project.assignees.map((user) => (
-                    <Avatar
-                      key={user}
-                      src={`https://ui-avatars.com/api/?name=${user}&size=64&rounded=true&color=fff&background=random`}
-                      alt={user}
-                    />
-                  ))}
+                  {Array.isArray(project.assignees) &&
+                    project.assignees.map((user) => (
+                      <Avatar
+                        key={user}
+                        src={`https://ui-avatars.com/api/?name=${user}&size=64&rounded=true&color=fff&background=random`}
+                        alt={user}
+                      />
+                    ))}
                 </div>
               </div>
             </Card>
@@ -252,20 +284,16 @@ const Projects = () => {
           >
             <Select mode="multiple" placeholder="Select users">
               {users.map((user) => (
-                <Option key={user._id} value={user.username}>{user.username}</Option>
+                <Option key={user._id} value={user.username}>
+                  {user.username}
+                </Option>
               ))}
             </Select>
           </Form.Item>
 
           {/* Description Field */}
-          <Form.Item
-            name="description"
-            label="Description"
-          >
-            <ReactQuill
-              placeholder="Add project description"
-              theme="snow"
-            />
+          <Form.Item name="description" label="Description">
+            <ReactQuill placeholder="Add project description" theme="snow" />
           </Form.Item>
         </Form>
       </Modal>

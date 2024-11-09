@@ -3,6 +3,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../Components/css/Shimmer.css";
+import { server } from "../main";
 
 const Shimmer = () => {
   return (
@@ -32,7 +33,7 @@ const Clients = () => {
     try {
       setLoading(true); // Start loading
       const response = await axios.get(
-        "https://task-manager-backend-btas.onrender.com/api/clients"
+        `${server}/clients`
       );
       setClients(response.data);
     } catch (error) {
@@ -46,7 +47,7 @@ const Clients = () => {
   const fetchDepartments = async () => {
     try {
       const response = await axios.get(
-        "https://task-manager-backend-btas.onrender.com/api/departments"
+        `${server}/departments`
       );
       setDepartments(response.data);
     } catch (error) {
@@ -75,7 +76,7 @@ const Clients = () => {
     try {
       if (newClient._id) {
         const response = await axios.put(
-          `https://task-manager-backend-btas.onrender.com/api/clients/${newClient._id}`,
+          `${server}/clients/${newClient._id}`,
           formData,
           {
             headers: {
@@ -91,7 +92,7 @@ const Clients = () => {
         toast.success("Client updated successfully!");
       } else {
         const response = await axios.post(
-          "https://task-manager-backend-btas.onrender.com/api/clients",
+          `${server}/clients`,
           formData,
           {
             headers: {
@@ -130,7 +131,7 @@ const Clients = () => {
   const handleDelete = async (clientId) => {
     try {
       await axios.delete(
-        `https://task-manager-backend-btas.onrender.com/api/clients/${clientId}`
+        `${server}/clients/${clientId}`
       );
       setClients(clients.filter((client) => client._id !== clientId));
       toast.success("Client deleted successfully!");
