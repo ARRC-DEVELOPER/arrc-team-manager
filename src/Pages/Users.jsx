@@ -13,6 +13,12 @@ import {
 import axios from "axios";
 import { server } from "../main";
 import { useNavigate } from "react-router-dom";
+import {
+  UserOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  EllipsisOutlined,
+} from "@ant-design/icons";
 
 const { Option } = Select;
 
@@ -90,11 +96,7 @@ const Users = () => {
 
     if (file) {
       formData.append("profilePicture", file);
-    } else {
-      console.warn("No file selected to upload.");
     }
-
-    console.log(formData);
 
     try {
       const response = editingUser
@@ -114,7 +116,6 @@ const Users = () => {
       fetchUsers();
       handleCancel();
     } catch (error) {
-      console.error("Error creating/updating user:", error.response?.data);
       message.error(
         "Failed to save user: " +
           (error.response?.data?.message || "unknown error")
@@ -137,11 +138,29 @@ const Users = () => {
     }
   };
 
+  const handleArchiveUser = async (userId) => {
+    const token = localStorage.getItem("authToken");
+
+    try {
+      await axios.put(
+        `${server}/users/archive/${userId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
+      message.success("User archived successfully");
+      fetchUsers();
+    } catch (error) {
+      message.error("Failed to archive user");
+    }
+  };
+
   const handleFilterChange = (value) => {
     setFilter(value);
   };
 
-  // Filter users based on the filter value
   const filteredUsers = users.filter((user) => {
     if (filter === "all") return true;
     return filter === "1" ? user.isActive : !user.isActive;
@@ -173,6 +192,7 @@ const Users = () => {
         <Select
           onChange={handleFilterChange}
           style={{ width: "200px", marginRight: "16px" }}
+          placeholder="Filter Users"
         >
           <Option value="all">All</Option>
           <Option value="1">Active</Option>
@@ -186,20 +206,20 @@ const Users = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredUsers.map((user) => (
           <div
-            onClick={() => navigate(`/user/${user._id}`)}
-            className="bg-white cursor-pointer shadow-md rounded-lg overflow-hidden user-card-view hover:shadow-lg transition-shadow duration-300 ease-in-out"
+            className="bg-white shadow-md rounded-lg overflow-hidden user-card-view hover:shadow-lg transition-shadow duration-300 ease-in-out"
             key={user._id}
           >
             <div className="flex items-center p-4 border-b">
               <div className="mr-3">
                 <img
+                  onClick={() => navigate(`/user/${user._id}`)}
                   alt="avatar"
                   width="50"
                   src={
                     user.profilePicture ||
                     `https://ui-avatars.com/api/?name=${user.name}&size=64&rounded=true&color=fff&background=42c9af`
                   }
-                  className="rounded-full"
+                  className="cursor-pointer rounded-full"
                 />
                 <label
                   className="custom-switch pl-0"
@@ -216,7 +236,10 @@ const Users = () => {
               </div>
               <div className="flex-1">
                 <div className="flex justify-between items-center">
-                  <h4 className="font-semibold text-lg text-gray-800">
+                  <h4
+                    onClick={() => navigate(`/user/${user._id}`)}
+                    className="cursor-pointer font-semibold text-lg text-gray-800"
+                  >
                     {user.name}
                   </h4>
                   <Dropdown
@@ -229,6 +252,12 @@ const Users = () => {
                           Edit
                         </Menu.Item>
                         <Menu.Item
+                          onClick={() => handleArchiveUser(user._id)}
+                          className="hover:bg-gray-200"
+                        >
+                          Archive
+                        </Menu.Item>
+                        <Menu.Item
                           onClick={() => handleDelete(user._id)}
                           className="hover:bg-gray-200"
                         >
@@ -237,21 +266,23 @@ const Users = () => {
                       </Menu>
                     }
                     trigger={["click"]}
+                    getPopupContainer={(trigger) => trigger.parentNode} // To avoid dropdown clipping issues
                   >
                     <Button
                       className="text-gray-600 hover:text-blue-500"
                       type="link"
-                    >
-                      <i className="fas fa-ellipsis-v"></i>
-                    </Button>
+                      icon={<EllipsisOutlined />}
+                    />
                   </Dropdown>
                 </div>
                 <div className="text-gray-500">{getRoleName(user.role)}</div>
                 <div className="text-gray-600 flex items-center">
+                  <MailOutlined className="mr-1" />
                   {user.email}
-                  <span title="Email is verified" className="ml-1">
-                    <i className="fas fa-check-circle text-green-500"></i>
-                  </span>
+                </div>
+                <div className="text-gray-600 flex items-center">
+                  <PhoneOutlined className="mr-1" />
+                  {user.phone}
                 </div>
               </div>
             </div>
@@ -263,7 +294,7 @@ const Users = () => {
               </div>
               <div>
                 <span className="bg-gray-800 text-white px-2 py-1 rounded">
-                  {user.tasks || 0}
+                  {user.ongoingTaskCount || 0}
                 </span>{" "}
                 Tasks Active
               </div>
@@ -282,108 +313,56 @@ const Users = () => {
           onFinish={handleOk}
           layout="vertical"
           initialValues={editingUser}
-          className="space-y-4"
+          className="space-y-3"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Form.Item
-              name="name"
-              label="Name"
-              rules={[{ required: true, message: "Please input the name!" }]}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              name="email"
-              label="Email"
-              rules={[{ required: true, message: "Please input the email!" }]}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              name="phone"
-              label="Phone"
-              rules={[
-                { required: true, message: "Please input the phone number!" },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              name="password"
-              label="New Password"
-              rules={[
-                {
-                  required: !editingUser,
-                  message: "Please input the new password!",
-                },
-              ]}
-            >
-              <Input.Password />
-            </Form.Item>
-            <Form.Item
-              name="confirmPassword"
-              label="Confirm Password"
-              rules={[
-                {
-                  required: !editingUser,
-                  message: "Please confirm your password!",
-                },
-              ]}
-            >
-              <Input.Password />
-            </Form.Item>
-            <Form.Item
-              name="project"
-              label="Project"
-              rules={[{ required: true, message: "Please select a project!" }]}
-            >
-              <Select placeholder="Select a project">
-                {projects.map((project) => (
-                  <Option key={project._id} value={project._id}>
-                    {project.name}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item
-              name="role"
-              label="Role"
-              rules={[{ required: true, message: "Please select a role!" }]}
-            >
-              <Select placeholder="Select a role">
-                {roles.map((role) => (
-                  <Option key={role._id} value={role._id}>
-                    {role.name}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item
-              name="salary"
-              label="Salary"
-              rules={[{ required: true, message: "Please input the salary!" }]}
-            >
-              <Input type="number" />
-            </Form.Item>
-            <Form.Item name="isActive" label="Active" valuePropName="checked">
-              <Switch />
-            </Form.Item>
-          </div>
-
-          <div className="mb-2">
-            <label className="block mb-1">Profile Image:</label>
-            <input
-              type="file"
-              onChange={handleInputChange}
-              className="p-2 border border-gray-300 rounded w-full"
-            />
-          </div>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              {editingUser ? "Update" : "Create"} User
-            </Button>
+          <Form.Item name="name" label="Name" required>
+            <Input placeholder="Enter name" prefix={<UserOutlined />} />
           </Form.Item>
+          <Form.Item name="email" label="Email" required>
+            <Input
+              type="email"
+              placeholder="Enter email"
+              prefix={<MailOutlined />}
+            />
+          </Form.Item>
+          <Form.Item name="phone" label="Phone" required>
+            <Input placeholder="Enter phone" prefix={<PhoneOutlined />} />
+          </Form.Item>
+          <Form.Item name="salary" label="Salary">
+            <Input type="number" placeholder="Enter salary" />
+          </Form.Item>
+          {!editingUser && (
+            <Form.Item name="password" label="Password" required>
+              <Input.Password placeholder="Enter password" />
+            </Form.Item>
+          )}
+          <Form.Item name="role" label="Role" required>
+            <Select placeholder="Select role">
+              {roles.map((role) => (
+                <Option key={role._id} value={role._id}>
+                  {role.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item name="project" label="Project">
+            <Select placeholder="Select project">
+              {projects.map((project) => (
+                <Option key={project._id} value={project._id}>
+                  {project.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item name="isActive" label="Status" valuePropName="checked">
+            <Switch checkedChildren="Active" unCheckedChildren="Inactive" />
+          </Form.Item>
+          <Form.Item name="profilePicture" label="Profile Picture">
+            <Input type="file" onChange={handleInputChange} />
+          </Form.Item>
+          <Button type="primary" htmlType="submit">
+            Save
+          </Button>
         </Form>
       </Modal>
     </div>

@@ -6,10 +6,10 @@ import "./index.css";
 import { Provider as ReduxProvider } from "react-redux";
 import store from "./redux/store.js";
 
-// Production URL
+// Deplopement URL
 // export const server = "http://localhost:5000/api";
 
-// Deployement URL
+// Production URL
 export const server = "https://arrc-team-manager-server.onrender.com/api";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
