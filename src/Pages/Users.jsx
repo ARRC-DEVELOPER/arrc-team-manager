@@ -28,15 +28,15 @@ const Users = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [filter, setFilter] = useState("all");
   const [roles, setRoles] = useState([]);
-  const [projects, setProjects] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [file, setFile] = useState(null);
-
+  const [form] = Form.useForm();
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchUsers();
     fetchRoles();
-    fetchProjects();
+    fetchDepartments();
   }, []);
 
   const fetchUsers = async () => {
@@ -62,19 +62,29 @@ const Users = () => {
     }
   };
 
-  const fetchProjects = async () => {
+  const fetchDepartments = async () => {
     try {
-      const response = await axios.get(`${server}/projects`);
-      setProjects(response.data);
+      const response = await axios.get(`${server}/departments`);
+      setDepartments(response.data);
     } catch (error) {
-      message.error("Failed to fetch projects");
+      message.error("Failed to fetch departments");
     }
   };
 
-  const showModal = (user = null) => {
+  const showModal = (user) => {
     setEditingUser(user);
     setVisible(true);
-    setFile(null); // Reset file when opening the modal
+    setFile(null);
+    if (user) {
+      form.setFieldsValue({
+        ...user,
+        isActive: user.isActive,
+        department: user.department?._id,
+        role: user.role?._id,
+      });
+    } else {
+      form.resetFields();
+    }
   };
 
   const handleOk = async (values) => {
@@ -82,16 +92,13 @@ const Users = () => {
     formData.append("name", values.name);
     formData.append("email", values.email);
     formData.append("phone", values.phone);
-
     if (!editingUser) {
       formData.append("password", values.password);
     }
-
     formData.append("role", values.role);
-    formData.append("project", values.project);
+    formData.append("department", values.department);
     formData.append("salary", values.salary);
     formData.append("isActive", values.isActive);
-
     formData.append("status", values.isActive ? "active" : "inactive");
 
     if (file) {
@@ -101,14 +108,10 @@ const Users = () => {
     try {
       const response = editingUser
         ? await axios.put(`${server}/users/${editingUser._id}`, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
+            headers: { "Content-Type": "multipart/form-data" },
           })
         : await axios.post(`${server}/users`, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
+            headers: { "Content-Type": "multipart/form-data" },
           });
       message.success(
         editingUser ? "User updated successfully" : "User created successfully"
@@ -117,8 +120,7 @@ const Users = () => {
       handleCancel();
     } catch (error) {
       message.error(
-        "Failed to save user: " +
-          (error.response?.data?.message || "unknown error")
+        "Failed to save user: " + (error.response?.data?.message || "unknown error")
       );
     }
   };
@@ -126,6 +128,7 @@ const Users = () => {
   const handleCancel = () => {
     setVisible(false);
     setEditingUser(null);
+    form.resetFields();
   };
 
   const handleDelete = async (userId) => {
@@ -139,15 +142,12 @@ const Users = () => {
   };
 
   const handleArchiveUser = async (userId) => {
-    const token = localStorage.getItem("authToken");
-
     try {
       await axios.put(
         `${server}/users/archive/${userId}`,
         {},
         {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
+          headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
         }
       );
       message.success("User archived successfully");
@@ -180,9 +180,9 @@ const Users = () => {
     return role ? role.name : "Unknown Role";
   };
 
-  const getProjectName = (projectId) => {
-    const project = projects.find((p) => p._id === projectId);
-    return project ? project.name : "Unknown Project";
+  const getDepartmentName = (departmentId) => {
+    const department = departments.find((p) => p._id === departmentId);
+    return department ? department.name : "Unknown Department";
   };
 
   return (
@@ -289,7 +289,7 @@ const Users = () => {
             <div className="flex p-4 border-t">
               <div className="mr-3">
                 <span className="bg-blue-500 text-white px-2 py-1 rounded">
-                  {getProjectName(user.project)}
+                  {getDepartmentName(user.department)}
                 </span>
               </div>
               <div>
@@ -306,38 +306,50 @@ const Users = () => {
       <Modal
         title={editingUser ? "Edit User" : "New User"}
         visible={visible}
+        onOk={() => form.validateFields().then(handleOk).catch(console.log)}
         onCancel={handleCancel}
-        footer={null}
+        okText={editingUser ? "Update" : "Create"}
       >
-        <Form
-          onFinish={handleOk}
-          layout="vertical"
-          initialValues={editingUser}
-          className="space-y-3"
-        >
-          <Form.Item name="name" label="Name" required>
-            <Input placeholder="Enter name" prefix={<UserOutlined />} />
+        <Form form={form} layout="vertical">
+          <Form.Item
+            name="name"
+            label="Name"
+            rules={[{ required: true, message: "Please input the name" }]}
+          >
+            <Input prefix={<UserOutlined />} />
           </Form.Item>
-          <Form.Item name="email" label="Email" required>
-            <Input
-              type="email"
-              placeholder="Enter email"
-              prefix={<MailOutlined />}
-            />
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { required: true, message: "Please input the email" },
+              { type: "email", message: "Please enter a valid email" },
+            ]}
+          >
+            <Input prefix={<MailOutlined />} />
           </Form.Item>
-          <Form.Item name="phone" label="Phone" required>
-            <Input placeholder="Enter phone" prefix={<PhoneOutlined />} />
-          </Form.Item>
-          <Form.Item name="salary" label="Salary">
-            <Input type="number" placeholder="Enter salary" />
+          <Form.Item
+            name="phone"
+            label="Phone"
+            rules={[{ required: true, message: "Please input the phone" }]}
+          >
+            <Input prefix={<PhoneOutlined />} />
           </Form.Item>
           {!editingUser && (
-            <Form.Item name="password" label="Password" required>
-              <Input.Password placeholder="Enter password" />
+            <Form.Item
+              name="password"
+              label="Password"
+              rules={[{ required: true, message: "Please input the password" }]}
+            >
+              <Input.Password />
             </Form.Item>
           )}
-          <Form.Item name="role" label="Role" required>
-            <Select placeholder="Select role">
+          <Form.Item
+            name="role"
+            label="Role"
+            rules={[{ required: true, message: "Please select a role" }]}
+          >
+            <Select placeholder="Select Role">
               {roles.map((role) => (
                 <Option key={role._id} value={role._id}>
                   {role.name}
@@ -345,24 +357,36 @@ const Users = () => {
               ))}
             </Select>
           </Form.Item>
-          <Form.Item name="project" label="Project">
-            <Select placeholder="Select project">
-              {projects.map((project) => (
-                <Option key={project._id} value={project._id}>
-                  {project.name}
+          <Form.Item
+            name="department"
+            label="Department"
+            rules={[{ required: true, message: "Please select a department" }]}
+          >
+            <Select placeholder="Select Department">
+              {departments.map((department) => (
+                <Option key={department._id} value={department._id}>
+                  {department.name}
                 </Option>
               ))}
             </Select>
           </Form.Item>
-          <Form.Item name="isActive" label="Status" valuePropName="checked">
+          <Form.Item
+            name="salary"
+            label="Salary"
+            rules={[{ required: true, message: "Please input the salary" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item label="Profile Picture">
+            <input type="file" onChange={handleInputChange} />
+          </Form.Item>
+          <Form.Item
+            name="isActive"
+            label="Active Status"
+            valuePropName="checked"
+          >
             <Switch checkedChildren="Active" unCheckedChildren="Inactive" />
           </Form.Item>
-          <Form.Item name="profilePicture" label="Profile Picture">
-            <Input type="file" onChange={handleInputChange} />
-          </Form.Item>
-          <Button type="primary" htmlType="submit">
-            Save
-          </Button>
         </Form>
       </Modal>
     </div>

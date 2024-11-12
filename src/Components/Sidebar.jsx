@@ -4,6 +4,7 @@ import {
   MdOutlinePendingActions,
   MdSettings,
   MdTaskAlt,
+  MdLeaderboard,
 } from "react-icons/md";
 import { FaTasks, FaTicketAlt, FaTrashAlt, FaUsers } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
@@ -106,6 +107,13 @@ const linkData = [
     label: "Roles",
     to: "/roles",
     permission: "Manage Roles",
+  },
+  {
+    key: "leads",
+    icon: <MdLeaderboard style={{ color: "#fa8c16" }} />,
+    label: "Leads",
+    to: "/leads",
+    permission: "Manage Leads",
   },
   {
     key: "sales",

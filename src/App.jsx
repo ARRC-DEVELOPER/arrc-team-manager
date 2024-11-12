@@ -45,6 +45,7 @@ import UserDetails from "./Pages/UserDetails";
 import TicketForm from "./Pages/Ticket/TicketForm";
 import TicketList from "./Pages/Ticket/Tickets";
 import TicketHistory from "./Pages/Ticket/TicketHistory";
+import Leads from "./Pages/Leads";
 
 const AppContent = ({
   isAuthenticated,
@@ -121,6 +122,7 @@ const AppContent = ({
                 <Route path="/user/:userId" element={<UserDetails />} />
                 <Route path="/archived-users" element={<ArchivedUsers />} />
                 <Route path="/roles" element={<Roles />} />
+                <Route path="/leads" element={<Leads />} />
                 <Route path="/sales" element={<Sales />} />
                 <Route path="/activity-logs" element={<ActivityLogs />} />
                 <Route path="/events" element={<Events />} />
