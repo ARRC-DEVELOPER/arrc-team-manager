@@ -46,6 +46,7 @@ import TicketForm from "./Pages/Ticket/TicketForm";
 import TicketList from "./Pages/Ticket/Tickets";
 import TicketHistory from "./Pages/Ticket/TicketHistory";
 import Leads from "./Pages/Leads";
+import LeadTask from "./Pages/LeadTask";
 
 const AppContent = ({
   isAuthenticated,
@@ -123,7 +124,14 @@ const AppContent = ({
                 <Route path="/archived-users" element={<ArchivedUsers />} />
                 <Route path="/roles" element={<Roles />} />
                 <Route path="/leads" element={<Leads />} />
-                <Route path="/sales" element={<Sales />} />
+
+                {loggedInUser.role.name === "Admin" ||
+                loggedInUser.role.name === "Manager" ? (
+                  <Route path="/sales" element={<Sales />} />
+                ) : (
+                  <Route path="/sales" element={<LeadTask />} />
+                )}
+
                 <Route path="/activity-logs" element={<ActivityLogs />} />
                 <Route path="/events" element={<Events />} />
                 <Route path="/team" element={<Team />} />
