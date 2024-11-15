@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Table, Select, notification, Button } from "antd";
+import { Table, Select, DatePicker, Input, notification, Button } from "antd";
 import * as XLSX from "xlsx";
 import { server } from "../main";
+import moment from "moment";
 
 const { Option } = Select;
 
@@ -10,32 +11,37 @@ const LeadTask = () => {
   const [leads, setLeads] = useState([]);
   const [lead, setLead] = useState("");
 
-  console.log(lead);
+  console.log(leads);
 
   useEffect(() => {
-    const fetchLeads = async () => {
-      const token = localStorage.getItem("authToken");
-
-      try {
-        const response = await axios.get(`${server}/leads/getMyLeads`, {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        });
-
-        if (response.data.success) {
-          setLeads(response.data.leads);
-          setLead(response.data.lead);
-        } else {
-          notification.error({ message: response.data.message });
-        }
-      } catch (error) {
-        console.error("Error fetching leads:", error);
-        notification.error({ message: "Failed to fetch leads" });
-      }
-    };
-
     fetchLeads();
+    const storedLeads = localStorage.getItem("leads");
+    if (storedLeads) {
+      setLeads(JSON.parse(storedLeads));
+    }
   }, []);
+
+  const fetchLeads = async () => {
+    const token = localStorage.getItem("authToken");
+
+    try {
+      const response = await axios.get(`${server}/leads/getMyLeads`, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
+
+      if (response.data.success) {
+        setLeads(response.data.leads);
+        setLead(response.data.lead);
+      } else {
+        notification.error({ message: response.data.message });
+        setLeads([]);
+      }
+    } catch (error) {
+      console.error("Error fetching leads:", error);
+      notification.error({ message: "Failed to fetch leads" });
+    }
+  };
 
   const handleUpdateSheet = async () => {
     try {
@@ -77,6 +83,7 @@ const LeadTask = () => {
 
       if (response.data.success) {
         notification.success({ message: "Lead file updated successfully" });
+        localStorage.removeItem("leads");
       } else {
         notification.error({ message: response.data.message });
       }
@@ -84,6 +91,20 @@ const LeadTask = () => {
       console.error("Error updating lead file:", error);
       notification.error({ message: "Failed to update lead file" });
     }
+  };
+
+  const handleStatusChange = (value, record, index) => {
+    const updatedLeads = [...leads];
+    updatedLeads[index].Status = value;
+    setLeads(updatedLeads);
+    localStorage.setItem("leads", JSON.stringify(updatedLeads));
+  };
+
+  const handleEditableChange = (key, value, index) => {
+    const updatedLeads = [...leads];
+    updatedLeads[index][key] = value;
+    setLeads(updatedLeads);
+    localStorage.setItem("leads", JSON.stringify(updatedLeads));
   };
 
   const columns = [
@@ -106,30 +127,56 @@ const LeadTask = () => {
       title: "Calling Purpose",
       dataIndex: "Calling Purpose",
       key: "callingPurpose",
+      render: (text, record, index) => (
+        <Input
+          defaultValue={text}
+          onChange={(e) => handleEditableChange("Calling Purpose", e.target.value, index)}
+        />
+      ),
     },
     {
       title: "Calling Date",
       dataIndex: "Calling Date",
       key: "callingDate",
-      render: (date) => new Date(date).toLocaleDateString(),
+      render: (date, record, index) => (
+        <DatePicker
+          defaultValue={moment(date)}
+          onChange={(date) => handleEditableChange("Calling Date", date ? date.toISOString() : null, index)}
+        />
+      ),
     },
     {
       title: "Follow-up Date",
       dataIndex: "Follow-up Date",
       key: "followUpDate",
-      render: (date) => new Date(date).toLocaleDateString(),
+      render: (date, record, index) => (
+        <DatePicker
+          defaultValue={moment(date)}
+          onChange={(date) => handleEditableChange("Follow-up Date", date ? date.toISOString() : null, index)}
+        />
+      ),
     },
     {
       title: "Question",
       dataIndex: "Question",
       key: "question",
+      render: (text, record, index) => (
+        <Input
+          defaultValue={text}
+          onChange={(e) => handleEditableChange("Question", e.target.value, index)}
+        />
+      ),
     },
     {
       title: "Status",
       dataIndex: "Status",
       key: "status",
-      render: (text, record) => (
-        <Select defaultValue={record.Status} style={{ width: 120 }}>
+      render: (text, record, index) => (
+        <Select
+          defaultValue={record.Status}
+          style={{ width: 120 }}
+          onChange={(value) => handleStatusChange(value, record, index)}
+        >
           <Option value="Not Answered">Not Answered</Option>
           <Option value="Rejected">Rejected</Option>
           <Option value="Accepted">Accepted</Option>
@@ -152,7 +199,7 @@ const LeadTask = () => {
       <Table
         columns={columns}
         dataSource={leads}
-        rowKey={(record) => record._id}
+        rowKey={(record) => record._id || record["Mobile Number"]}
         pagination={{ pageSize: 10 }}
         scroll={{ x: "100%" }}
       />
