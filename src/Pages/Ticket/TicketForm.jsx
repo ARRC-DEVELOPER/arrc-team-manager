@@ -34,7 +34,14 @@ function TicketForm() {
 
   useEffect(() => {
     fetchTickets();
+
+    const interval = setInterval(fetchTickets, 10 * 60 * 1000);
+
+    return () => clearInterval(interval);
   }, []);
+
+  // Filter tickets to only show those that are not yet in history
+  const activeTickets = tickets.filter((ticket) => !ticket.history);
 
   const handleSubmit = async () => {
     const formData = new FormData();
@@ -82,15 +89,6 @@ function TicketForm() {
       >
         + Raise Ticket
       </button>
-
-      <div className="space-x-2">
-        <button
-          onClick={handleHistoryClick}
-          className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition"
-        >
-          History
-        </button>
-      </div>
 
       {/* Modal for Ticket Form */}
       {isModalOpen && (
@@ -143,9 +141,20 @@ function TicketForm() {
 
       {/* Ticket List */}
       <div className="mt-8">
-        <h2 className="text-2xl font-semibold mb-4">My Tickets</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-semibold text-gray-800">Ticket List</h2>
+          <div className="space-x-2">
+            <button
+              onClick={handleHistoryClick}
+              className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition"
+            >
+              History
+            </button>
+          </div>
+        </div>
+
         <ul className="space-y-4">
-          {tickets.map((ticket) => (
+          {activeTickets.map((ticket) => (
             <li
               key={ticket._id}
               className="p-4 border rounded-lg shadow-md hover:shadow-lg transition-shadow flex items-center justify-between"

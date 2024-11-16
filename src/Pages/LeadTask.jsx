@@ -11,8 +11,6 @@ const LeadTask = () => {
   const [leads, setLeads] = useState([]);
   const [lead, setLead] = useState("");
 
-  console.log(leads);
-
   useEffect(() => {
     fetchLeads();
     const storedLeads = localStorage.getItem("leads");

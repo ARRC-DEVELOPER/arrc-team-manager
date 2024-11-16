@@ -85,7 +85,7 @@ const Navbar = ({ user, onLogout }) => {
   );
 
   return (
-    <header className="flex items-center justify-between p-4 bg-white shadow-md sticky top-0 z-50">
+    <header className="flex items-center justify-between p-4 bg-white shadow-md sticky top-0">
       <div className="flex items-center space-x-4 ml-auto">
         {/* Notifications */}
         <Notification notifications={notifications} />

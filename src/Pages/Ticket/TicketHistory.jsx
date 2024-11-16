@@ -58,32 +58,54 @@ function TicketHistory() {
         Ticket History
       </h2>
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
+        <table className="min-w-full bg-white rounded-lg shadow-md">
           <thead>
             <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
               <th className="py-3 px-6 text-left">Title</th>
-              <th className="py-3 px-6 text-left">Category</th>
+              <th className="py-3 px-6 text-left">Created By</th>
               <th className="py-3 px-6 text-center">Status</th>
-              <th className="py-3 px-6 text-center">Date Resolved</th>
+              <th className="py-3 px-6 text-center">Attachments</th>
             </tr>
           </thead>
           <tbody className="text-gray-600 text-sm font-light">
             {activeTickets.map((ticket) => (
               <tr
                 key={ticket._id}
-                className="border-b border-gray-200 hover:bg-gray-100 transition duration-200"
+                className={`border-b border-gray-200 hover:bg-gray-100 transition duration-200 ${
+                  ticket.status === "In Progress"
+                    ? "bg-yellow-100"
+                    : ticket.status === "Resolved"
+                    ? "bg-red-100"
+                    : "bg-white"
+                }`}
               >
                 <td className="py-3 px-6 text-left font-medium">
                   {ticket.title}
                 </td>
-                <td className="py-3 px-6 text-left">{ticket.category}</td>
+                
+                <td className="py-3 px-6 text-left">{ticket.createdBy.name}</td>
+
                 <td className="py-3 px-6 text-center">
-                  <span className="text-xs font-semibold inline-block py-1 px-3 rounded-full text-white bg-green-500">
-                    Resolved
+                  <span
+                    className={`text-xs font-semibold inline-block py-1 px-3 rounded-full text-white ${
+                      ticket.status === "Open"
+                        ? "bg-blue-500"
+                        : ticket.status === "In Progress"
+                        ? "bg-yellow-500"
+                        : "bg-green-500"
+                    }`}
+                  >
+                    {ticket.status}
                   </span>
                 </td>
+
                 <td className="py-3 px-6 text-center">
-                  {ticket.resolvedAt ? new Date(ticket.resolvedAt).toLocaleDateString() : "N/A"}
+                  <button
+                    onClick={() => handleShowAttachments(ticket.attachments)}
+                    className="bg-gray-500 text-white py-1 px-3 rounded-lg hover:bg-gray-600 transition"
+                  >
+                    View
+                  </button>
                 </td>
               </tr>
             ))}
