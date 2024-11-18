@@ -113,38 +113,58 @@ const Sales = () => {
               key={lead._id}
               className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-all duration-200"
             >
+              {/* left */}
               <div
                 onClick={() => handleOpenFile(lead.fileUrl, lead.originalName)}
-                className="flex-1"
               >
                 <p className="font-semibold text-gray-800">
                   {lead.originalName}
                 </p>
+                <p className="font-semibold text-gray-800">
+                  Assinged To: {lead.assignedTo.name}
+                </p>
                 <p className="text-sm text-gray-500">
-                  Uploaded on: {new Date(lead.uploadDate).toLocaleDateString()}
+                  Updated on: {new Date(lead.updatedDate).toLocaleDateString()}
                 </p>
               </div>
 
-              {/* Download Button */}
-              <a
-                href={lead.fileUrl}
-                download
-                className="flex items-center justify-center p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-200 ease-in-out transform hover:scale-110"
-              >
-                <FiDownload />
-              </a>
+              <div className="flex items-center gap-6">
+                <div className="text-center">
+                  <p className="text-xl text-gray-500">Updated</p>
+                  <span className="text-lg font-semibold text-green-600">
+                    {lead.updatedRecords || 0}
+                  </span>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl text-gray-500">Remaining</p>
+                  <span className="text-lg font-semibold text-red-600">
+                    {lead.notUpdatedRecords || 0}
+                  </span>
+                </div>
+              </div>
 
-              {/* Delete Button */}
-              <button
-                onClick={() => handleDeleteLead(lead._id)}
-                className="flex items-center justify-center p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition duration-200 ease-in-out transform hover:scale-110 ml-2"
-              >
-                <FiTrash2 />
-              </button>
+              {/* right */}
+              <div className="flex">
+                <a
+                  href={lead.fileUrl}
+                  download
+                  className="flex items-center justify-center p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-200 ease-in-out transform hover:scale-110"
+                >
+                  <FiDownload />
+                </a>
+
+                {/* Delete Button */}
+                <button
+                  onClick={() => handleDeleteLead(lead._id)}
+                  className="flex items-center justify-center p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition duration-200 ease-in-out transform hover:scale-110 ml-2"
+                >
+                  <FiTrash2 />
+                </button>
+              </div>
             </div>
           ))
         ) : (
-          <p className="text-gray-500">No leads uploaded yet.</p>
+          <p className="text-gray-500">No leads assigned yet.</p>
         )}
       </div>
 

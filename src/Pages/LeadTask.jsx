@@ -28,6 +28,8 @@ const LeadTask = () => {
         withCredentials: true,
       });
 
+      console.log(response);
+
       if (response.data.success) {
         setLeads(response.data.leads);
         setLead(response.data.lead);
@@ -128,7 +130,9 @@ const LeadTask = () => {
       render: (text, record, index) => (
         <Input
           defaultValue={text}
-          onChange={(e) => handleEditableChange("Calling Purpose", e.target.value, index)}
+          onChange={(e) =>
+            handleEditableChange("Calling Purpose", e.target.value, index)
+          }
         />
       ),
     },
@@ -139,7 +143,13 @@ const LeadTask = () => {
       render: (date, record, index) => (
         <DatePicker
           defaultValue={moment(date)}
-          onChange={(date) => handleEditableChange("Calling Date", date ? date.toISOString() : null, index)}
+          onChange={(date) =>
+            handleEditableChange(
+              "Calling Date",
+              date ? date.toISOString() : null,
+              index
+            )
+          }
         />
       ),
     },
@@ -150,7 +160,13 @@ const LeadTask = () => {
       render: (date, record, index) => (
         <DatePicker
           defaultValue={moment(date)}
-          onChange={(date) => handleEditableChange("Follow-up Date", date ? date.toISOString() : null, index)}
+          onChange={(date) =>
+            handleEditableChange(
+              "Follow-up Date",
+              date ? date.toISOString() : null,
+              index
+            )
+          }
         />
       ),
     },
@@ -161,7 +177,9 @@ const LeadTask = () => {
       render: (text, record, index) => (
         <Input
           defaultValue={text}
-          onChange={(e) => handleEditableChange("Question", e.target.value, index)}
+          onChange={(e) =>
+            handleEditableChange("Question", e.target.value, index)
+          }
         />
       ),
     },
@@ -186,14 +204,17 @@ const LeadTask = () => {
 
   return (
     <div>
-      <h2>Leads</h2>
-      <Button
-        type="primary"
-        onClick={handleUpdateSheet}
-        style={{ marginBottom: 16 }}
-      >
-        Update Sheet
-      </Button>
+      <div className="flex justify-between">
+        <h2>Leads</h2>
+        <Button
+          type="primary"
+          onClick={handleUpdateSheet}
+          style={{ marginBottom: 16 }}
+        >
+          Update Sheet
+        </Button>
+      </div>
+
       <Table
         columns={columns}
         dataSource={leads}

@@ -209,7 +209,7 @@ const Sidebar = ({ user }) => {
           position: "fixed",
           top: 16,
           left: collapsed ? 90 : 260,
-          zIndex: 10,
+          zIndex: 20,
           color: "gray",
         }}
         icon={<MenuOutlined />}
