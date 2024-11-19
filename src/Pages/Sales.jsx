@@ -18,6 +18,11 @@ const Sales = () => {
   const [selectedFileName, setSelectedFileName] = useState("");
   const [excelData, setExcelData] = useState(null);
 
+  const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
+  const [followUpLeads, setFollowUpLeads] = useState([]);
+
+  console.log(followUpLeads);
+
   const fetchUsers = async () => {
     try {
       const usersResponse = await axios.get(`${server}/users`);
@@ -90,6 +95,16 @@ const Sales = () => {
     setExcelData(null);
   };
 
+  const handleOpenFollowUpModal = (leadFollowUpLeads) => {
+    setFollowUpLeads(leadFollowUpLeads);
+    setIsFollowUpModalOpen(true);
+  };
+
+  const handleCloseFollowUpModal = () => {
+    setFollowUpLeads([]);
+    setIsFollowUpModalOpen(false);
+  };
+
   const filteredUsers = users.filter(
     (user) => user.role === "670546c00e9ed04781616eb6"
   );
@@ -111,10 +126,11 @@ const Sales = () => {
           assignedLeads.map((lead) => (
             <div
               key={lead._id}
-              className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-all duration-200"
+              className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200"
             >
               {/* left */}
               <div
+                className="cursor-pointer"
                 onClick={() => handleOpenFile(lead.fileUrl, lead.originalName)}
               >
                 <p className="font-semibold text-gray-800">
@@ -135,10 +151,21 @@ const Sales = () => {
                     {lead.updatedRecords || 0}
                   </span>
                 </div>
+
                 <div className="text-center">
                   <p className="text-xl text-gray-500">Remaining</p>
                   <span className="text-lg font-semibold text-red-600">
                     {lead.notUpdatedRecords || 0}
+                  </span>
+                </div>
+
+                <div
+                  className="text-center cursor-pointer"
+                  onClick={() => handleOpenFollowUpModal(lead.followupLeads)}
+                >
+                  <p className="text-xl text-gray-500">Follow Up Due</p>
+                  <span className="text-lg font-semibold text-red-600">
+                    {lead.followUpCount || 0}
                   </span>
                 </div>
               </div>
@@ -275,6 +302,58 @@ const Sales = () => {
           </div>
         </div>
       )}
+
+      {/* Follow-Up Leads Modal */}
+      <Modal
+        title="Follow-Up Leads"
+        visible={isFollowUpModalOpen}
+        onCancel={handleCloseFollowUpModal}
+        footer={null}
+      >
+        <table className="w-full border-collapse border border-gray-300">
+          <thead>
+            <tr>
+              <th className="p-2 border border-gray-300">Client Name</th>
+              <th className="p-2 border border-gray-300">Mobile Number</th>
+              <th className="p-2 border border-gray-300">City</th>
+              <th className="p-2 border border-gray-300">Follow-Up Date</th>
+              <th className="p-2 border border-gray-300">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {followUpLeads.length > 0 ? (
+              followUpLeads.map((followUp, index) => (
+                <tr key={index} className="hover:bg-gray-50">
+                  <td className="p-2 border border-gray-300">
+                    {followUp["Calinet Name"]}
+                  </td>
+                  <td className="p-2 border border-gray-300">
+                    {followUp["Mobile Number"]}
+                  </td>
+                  <td className="p-2 border border-gray-300">
+                    {followUp.City}
+                  </td>
+                  <td className="p-2 border border-gray-300">
+                    {followUp["Follow-up Date"]}
+                  </td>
+                  <td className="p-2 border border-gray-300">
+                    {followUp.Status}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan="5"
+                  className="text-center text-gray-500 py-4 border border-gray-300"
+                >
+                  No follow-up leads found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </Modal>
     </div>
   );
 };
