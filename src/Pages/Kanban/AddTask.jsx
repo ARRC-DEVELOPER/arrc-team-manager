@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { toast } from "react-toastify";
 
 import { server } from "../../main";
+import { FaMicrophone } from "react-icons/fa";
 
 const AddTask = ({ setCards, editingTask, setEditingTask }) => {
   const [projects, setProjects] = useState([]);
@@ -40,7 +41,14 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
     }
   );
 
-  console.log(addTask);
+  const [isListening, setIsListening] = useState(false);
+  const [isListeningDescription, setIsListeningDescription] = useState(false);
+
+  // Speech Recognition setup
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  const recognition = SpeechRecognition ? new SpeechRecognition() : null;
 
   useEffect(() => {
     if (editingTask) {
@@ -50,7 +58,6 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
           ? new Date(editingTask.dueDate).toISOString().split("T")[0]
           : "",
         tags: editingTask.tags ? editingTask.tags.join(", ") : "",
-        // attachments: editingTask.attachments || [],
       });
       setIsModalVisibleNew(true);
     }
@@ -163,6 +170,60 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
     } else {
       setTaskData((prevData) => ({ ...prevData, description: e }));
       setaddTask((prevData) => ({ ...prevData, description: e }));
+    }
+  };
+
+  const handleMicClick = () => {
+    if (!recognition) {
+      toast.error("Speech Recognition is not supported in this browser.");
+      return;
+    }
+
+    if (isListening) {
+      recognition.stop();
+      setIsListening(false);
+    } else {
+      recognition.start();
+      setIsListening(true);
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setaddTask((prevData) => ({ ...prevData, title: transcript }));
+        setTaskData((prevData) => ({ ...prevData, title: transcript }));
+        setIsListening(false);
+      };
+
+      recognition.onerror = (event) => {
+        toast.error(`Error occurred during recognition: ${event.error}`);
+        setIsListening(false);
+      };
+    }
+  };
+
+  const handleDescriptionMicClick = () => {
+    if (!recognition) {
+      toast.error("Speech Recognition is not supported in this browser.");
+      return;
+    }
+
+    if (isListening) {
+      recognition.stop();
+      setIsListeningDescription(false);
+    } else {
+      recognition.start();
+      setIsListeningDescription(true);
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setaddTask((prevData) => ({ ...prevData, description: transcript }));
+        setTaskData((prevData) => ({ ...prevData, description: transcript }));
+        setIsListeningDescription(false);
+      };
+
+      recognition.onerror = (event) => {
+        toast.error(`Error occurred during recognition: ${event.error}`);
+        setIsListeningDescription(false);
+      };
     }
   };
 
@@ -285,12 +346,22 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
           className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
           <div>
-            <label
-              className="block mb-2 font-semibold text-gray-700"
-              htmlFor="title"
-            >
-              Title*
-            </label>
+            <div className="flex gap-5">
+              <label
+                className="block mb-2 font-semibold text-gray-700"
+                htmlFor="title"
+              >
+                Title*
+              </label>
+              <FaMicrophone
+                className={`cursor-pointer text-lg ${
+                  isListening ? "text-red-500" : "text-gray-500"
+                }`}
+                onClick={handleMicClick}
+                title="Voice Input"
+              />
+            </div>
+
             <input
               type="text"
               name="title"
@@ -461,12 +532,21 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
           </div>
 
           <div className="col-span-2 md:col-span-2 lg:col-span-2">
-            <label
-              className="block mb-2 font-semibold text-gray-700"
-              htmlFor="description"
-            >
-              Description
-            </label>
+            <div className="flex gap-5">
+              <label
+                className="block mb-2 font-semibold text-gray-700"
+                htmlFor="description"
+              >
+                Description
+              </label>
+              <FaMicrophone
+                className={`cursor-pointer text-lg ${
+                  isListeningDescription ? "text-red-500" : "text-gray-500"
+                }`}
+                onClick={handleDescriptionMicClick}
+                title="Voice Input"
+              />
+            </div>
             <div className="col-span-2">
               <ReactQuill
                 name={"description"}
