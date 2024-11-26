@@ -1,3 +1,5 @@
+// USER
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { server } from "../../main";
@@ -90,7 +92,7 @@ function TicketForm() {
         + Raise Ticket
       </button>
 
-      {/* Modal for Ticket Form */}
+      {/* Modal for Ticket Form */} 
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-xl w-full transition-transform transform duration-300 scale-100">
@@ -162,17 +164,6 @@ function TicketForm() {
               <div>
                 <h3 className="text-lg font-medium">{ticket.title}</h3>
                 <p className="text-sm text-gray-600">{ticket.description}</p>
-                {/* <span
-                  className={`text-sm mt-1 inline-block ${
-                    ticket.status === "Completed"
-                      ? "text-green-500"
-                      : ticket.status === "In Progress"
-                      ? "text-yellow-500"
-                      : "text-red-500"
-                  }`}
-                >
-                  {ticket.status}
-                </span> */}
               </div>
               <div>
                 <span

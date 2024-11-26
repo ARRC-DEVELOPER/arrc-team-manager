@@ -47,6 +47,9 @@ import TicketList from "./Pages/Ticket/Tickets";
 import TicketHistory from "./Pages/Ticket/TicketHistory";
 import Leads from "./Pages/Leads";
 import LeadTask from "./Pages/LeadTask";
+import Leaves from "./Pages/Leave/Leaves";
+import LeaveForm from "./Pages/Leave/LeaveForm";
+import LeaveHistory from "./Pages/Leave/LeaveHistory";
 
 const AppContent = ({
   isAuthenticated,
@@ -109,7 +112,7 @@ const AppContent = ({
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/tasks" element={<Tasks />} />
                 <Route path="/calendar" element={<CalendarPage />} />
-                <Route path="/reports" element={<Reports />} />
+                {/* <Route path="/reports" element={<Reports />} /> */}
 
                 {loggedInUser.role.name === "Admin" ||
                 loggedInUser.role.name === "Manager" ? (
@@ -119,6 +122,16 @@ const AppContent = ({
                 )}
 
                 <Route path="/ticket-history" element={<TicketHistory />} />
+
+                {loggedInUser.role.name === "Admin" ||
+                loggedInUser.role.name === "Manager" ? (
+                  <Route path="/leaves" element={<Leaves />} />
+                ) : (
+                  <Route path="/leaves" element={<LeaveForm />} />
+                )}
+
+                <Route path="/leave-history" element={<LeaveHistory />} />
+
                 <Route path="/users" element={<Users />} />
                 <Route path="/user/:userId" element={<UserDetails />} />
                 <Route path="/archived-users" element={<ArchivedUsers />} />
@@ -133,7 +146,7 @@ const AppContent = ({
                 )}
 
                 <Route path="/activity-logs" element={<ActivityLogs />} />
-                <Route path="/events" element={<Events />} />
+                {/* <Route path="/events" element={<Events />} /> */}
                 <Route path="/team" element={<Team />} />
                 <Route path="/trashed" element={<Trash />} />
                 <Route path="/tasks-data" element={<Tasks />} />

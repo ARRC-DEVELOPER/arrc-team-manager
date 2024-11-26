@@ -1,28 +1,20 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
 import {
+  GlobalOutlined,
+  SettingOutlined,
+  UserOutlined
+} from "@ant-design/icons";
+import {
+  Avatar,
   Button,
   Dropdown,
   Menu,
-  Avatar,
-  message,
-  Badge,
-  Modal,
-  List,
+  message
 } from "antd";
-import {
-  MenuOutlined,
-  CloseOutlined,
-  UserOutlined,
-  MoonOutlined,
-  SunOutlined,
-  BellOutlined,
-  SettingOutlined,
-  GlobalOutlined,
-} from "@ant-design/icons";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 
-import Notification from "./Notification.jsx";
 import { server } from "../main.jsx";
+import Notification from "./Notification.jsx";
 
 const Navbar = ({ user, onLogout }) => {
   // const [isDarkMode, setIsDarkMode] = useState(false);

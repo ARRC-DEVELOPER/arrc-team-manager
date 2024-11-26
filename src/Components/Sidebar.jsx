@@ -6,7 +6,14 @@ import {
   MdTaskAlt,
   MdLeaderboard,
 } from "react-icons/md";
-import { FaTasks, FaTicketAlt, FaTrashAlt, FaUsers } from "react-icons/fa";
+import {
+  FaTasks,
+  FaTicketAlt,
+  FaTrashAlt,
+  FaTrashRestore,
+  FaUsers,
+} from "react-icons/fa";
+import { FcLeave } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
 import { Layout, Menu, Button } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
@@ -73,33 +80,19 @@ const linkData = [
     to: "/calendar",
     permission: "Manage Calendar View",
   },
-  {
-    key: "reports",
-    icon: <MdTaskAlt style={{ color: "#eb2f96" }} />,
-    label: "Reports",
-    to: "/reports",
-    permission: "Manage Reports",
-  },
+  // {
+  //   key: "reports",
+  //   icon: <MdTaskAlt style={{ color: "#eb2f96" }} />,
+  //   label: "Reports",
+  //   to: "/reports",
+  //   permission: "Manage Reports",
+  // },
   {
     key: "users",
     icon: <FaUsers style={{ color: "#13c2c2" }} />,
     label: "Users",
     to: "/users",
     permission: "Manage Users",
-  },
-  {
-    key: "tickets",
-    icon: <FaTicketAlt style={{ color: "#13c2c2" }} />,
-    label: "Tikckets",
-    to: "/tickets",
-    permission: "Manage Tickets",
-  },
-  {
-    key: "archived-users",
-    icon: <FaTrashAlt style={{ color: "#f5222d" }} />,
-    label: "Archived Users",
-    to: "/archived-users",
-    permission: "Archived Users",
   },
   {
     key: "roles",
@@ -121,6 +114,55 @@ const linkData = [
     label: "Sales",
     to: "/sales",
     permission: "Manage Invoices",
+  },
+  {
+    key: "activity-logs",
+    icon: <MdSettings style={{ color: "#722ed1" }} />,
+    label: "Activity Logs",
+    to: "/activity-logs",
+    permission: "Manage Activity Log",
+  },
+  // {
+  //   key: "events",
+  //   icon: <MdOutlinePendingActions style={{ color: "#52c41a" }} />,
+  //   label: "Events",
+  //   to: "/events",
+  //   permission: "Manage Events",
+  // },
+  {
+    key: "team",
+    icon: <FaUsers style={{ color: "#fa541c" }} />,
+    label: "Team",
+    to: "/team",
+    permission: "Manage Users",
+  },
+  {
+    key: "tickets",
+    icon: <FaTicketAlt style={{ color: "#13c2c2" }} />,
+    label: "Tikckets",
+    to: "/tickets",
+    permission: "Manage Tickets",
+  },
+  {
+    key: "leave",
+    icon: <FcLeave style={{ color: "#13c2c2" }} />,
+    label: "Leaves",
+    to: "/leaves",
+    permission: "Manage Leaves",
+  },
+  {
+    key: "archived-users",
+    icon: <FaTrashRestore style={{ color: "#f5222d" }} />,
+    label: "Archived Users",
+    to: "/archived-users",
+    permission: "Archived Users",
+  },
+  {
+    key: "trashed",
+    icon: <FaTrashAlt style={{ color: "#f5222d" }} />,
+    label: "Trash",
+    to: "/trashed",
+    permission: "Manage Settings",
   },
   {
     key: "settings",
@@ -159,34 +201,6 @@ const linkData = [
       },
     ],
   },
-  {
-    key: "activity-logs",
-    icon: <MdSettings style={{ color: "#722ed1" }} />,
-    label: "Activity Logs",
-    to: "/activity-logs",
-    permission: "Manage Activity Log",
-  },
-  {
-    key: "events",
-    icon: <MdOutlinePendingActions style={{ color: "#52c41a" }} />,
-    label: "Events",
-    to: "/events",
-    permission: "Manage Events",
-  },
-  {
-    key: "team",
-    icon: <FaUsers style={{ color: "#fa541c" }} />,
-    label: "Team",
-    to: "/team",
-    permission: "Manage Users",
-  },
-  {
-    key: "trashed",
-    icon: <FaTrashAlt style={{ color: "#f5222d" }} />,
-    label: "Trash",
-    to: "/trashed",
-    permission: "Manage Settings",
-  },
 ];
 
 const Sidebar = ({ user }) => {
@@ -196,7 +210,7 @@ const Sidebar = ({ user }) => {
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
   };
-  
+
   const filteredLinks = linkData.filter((item) =>
     user.role.permissions.includes(item.permission)
   );

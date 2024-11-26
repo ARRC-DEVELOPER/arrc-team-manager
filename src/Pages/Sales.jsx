@@ -10,8 +10,10 @@ import * as XLSX from "xlsx";
 const Sales = () => {
   const [leads, setLeads] = useState([]);
   const [users, setUsers] = useState([]);
+
   const [selectedLead, setSelectedLead] = useState("");
-  const [selectedUser, setSelectedUser] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState("");
+
   const [isModalVisibleNew, setIsModalVisibleNew] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,8 +22,6 @@ const Sales = () => {
 
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
   const [followUpLeads, setFollowUpLeads] = useState([]);
-
-  console.log(followUpLeads);
 
   const fetchUsers = async () => {
     try {
@@ -47,7 +47,7 @@ const Sales = () => {
   }, []);
 
   const handleLeadAssignment = async () => {
-    if (!selectedLead || !selectedUser) {
+    if (!selectedLead || selectedUsers.length === 0) {
       toast.error("Please select both a lead and a user.");
       return;
     }
@@ -55,11 +55,11 @@ const Sales = () => {
     try {
       await axios.post(`${server}/leads/assignLeadTask`, {
         leadId: selectedLead,
-        userId: selectedUser,
+        assignedTo: selectedUsers,
       });
 
       setSelectedLead("");
-      setSelectedUser("");
+      setSelectedUsers("");
       setIsModalVisibleNew(false);
       message.success("Lead Task Assigned Successfully");
       fetchLeads();
@@ -108,8 +108,9 @@ const Sales = () => {
   const filteredUsers = users.filter(
     (user) => user.role === "670546c00e9ed04781616eb6"
   );
-  const assignedLeads = leads.filter((lead) => lead.assignedTo !== null);
-  const notAssignedLeads = leads.filter((lead) => lead.assignedTo === null);
+
+  const assignedLeads = leads.filter((lead) => lead.assignedTo.length !== 0);
+  const notAssignedLeads = leads.filter((lead) => lead.assignedTo.length === 0);
 
   return (
     <div>
@@ -137,7 +138,7 @@ const Sales = () => {
                   {lead.originalName}
                 </p>
                 <p className="font-semibold text-gray-800">
-                  Assinged To: {lead.assignedTo.name}
+                  Assinged To: {lead.assignedTo.map((i) => i.name).join(", ")}
                 </p>
                 <p className="text-sm text-gray-500">
                   Updated on: {new Date(lead.updatedDate).toLocaleDateString()}
@@ -195,7 +196,7 @@ const Sales = () => {
         )}
       </div>
 
-      {/* Modal for add new task */}
+      {/* Modal for add new leads */}
       <Modal
         title="Add Task"
         visible={isModalVisibleNew}
@@ -203,16 +204,11 @@ const Sales = () => {
         footer={null}
       >
         <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Lead Assignment Section */}
           <div>
-            <label
-              className="block mb-2 font-semibold text-gray-700"
-              htmlFor="lead"
-            >
+            <label className="block mb-2 font-semibold text-gray-700">
               Select Lead
             </label>
             <select
-              name="lead"
               value={selectedLead}
               onChange={(e) => setSelectedLead(e.target.value)}
               className="form-select border border-gray-300 rounded-md p-3 w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -227,25 +223,45 @@ const Sales = () => {
           </div>
 
           <div>
-            <label
-              className="block mb-2 font-semibold text-gray-700"
-              htmlFor="user"
-            >
-              Assign To User
+            <label className="block mb-2 font-semibold text-gray-700">
+              Assign To Users*
             </label>
             <select
-              name="user"
-              value={selectedUser}
-              onChange={(e) => setSelectedUser(e.target.value)}
+              name="assignedTo"
+              value={selectedUsers}
+              onChange={(e) => {
+                const options = Array.from(
+                  e.target.selectedOptions,
+                  (option) => option.value
+                );
+                setSelectedUsers(options);
+              }}
               className="form-select border border-gray-300 rounded-md p-3 w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              multiple
             >
-              <option value="">Select User</option>
               {filteredUsers.map((user) => (
                 <option key={user._id} value={user._id}>
                   {user.name}
                 </option>
               ))}
             </select>
+
+            {/* Display selected users */}
+            <div className="mt-4">
+              <h4 className="font-semibold text-gray-600">Selected Users:</h4>
+              <ul>
+                {selectedUsers.length > 0 ? (
+                  selectedUsers.map((userId) => {
+                    const user = filteredUsers.find(
+                      (user) => user._id === userId
+                    );
+                    return <li key={userId}>{user?.name}</li>;
+                  })
+                ) : (
+                  <li>No users selected</li>
+                )}
+              </ul>
+            </div>
           </div>
 
           <div className="col-span-2">
