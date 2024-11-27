@@ -10,6 +10,7 @@ import * as XLSX from "xlsx";
 const Sales = () => {
   const [leads, setLeads] = useState([]);
   const [users, setUsers] = useState([]);
+  const [isUpdateMode, setIsUpdateMode] = useState(false);
 
   const [selectedLead, setSelectedLead] = useState("");
   const [selectedUsers, setSelectedUsers] = useState("");
@@ -69,6 +70,13 @@ const Sales = () => {
     }
   };
 
+  const openModalForUpdate = (lead) => {
+    setSelectedLead(lead._id);
+    setSelectedUsers(lead.assignedTo.map((user) => user._id));
+    setIsUpdateMode(true);
+    setIsModalVisibleNew(true);
+  };
+
   const handleOpenFile = async (url, originalName) => {
     try {
       const response = await axios.get(url, { responseType: "arraybuffer" });
@@ -87,7 +95,10 @@ const Sales = () => {
   };
 
   const handleCancel = () => {
+    setSelectedLead("");
+    setSelectedUsers([]);
     setIsModalVisibleNew(false);
+    setIsUpdateMode(false);
   };
 
   const handleCloseModal = () => {
@@ -147,6 +158,16 @@ const Sales = () => {
 
               <div className="flex items-center gap-6">
                 <div className="text-center">
+                  <Button
+                    onClick={() => openModalForUpdate(lead)}
+                    type="default"
+                    className="bg-yellow-400 text-black hover:bg-yellow-500"
+                  >
+                    Update Assigned To
+                  </Button>
+                </div>
+
+                <div className="text-center">
                   <p className="text-xl text-gray-500">Updated</p>
                   <span className="text-lg font-semibold text-green-600">
                     {lead.updatedRecords || 0}
@@ -198,12 +219,13 @@ const Sales = () => {
 
       {/* Modal for add new leads */}
       <Modal
-        title="Add Task"
+        title={isUpdateMode ? "Update Task" : "Add Task"}
         visible={isModalVisibleNew}
         onCancel={handleCancel}
         footer={null}
       >
         <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Select Lead */}
           <div>
             <label className="block mb-2 font-semibold text-gray-700">
               Select Lead
@@ -222,6 +244,7 @@ const Sales = () => {
             </select>
           </div>
 
+          {/* Assign To Users */}
           <div>
             <label className="block mb-2 font-semibold text-gray-700">
               Assign To Users*
@@ -264,13 +287,14 @@ const Sales = () => {
             </div>
           </div>
 
+          {/* Submit Button */}
           <div className="col-span-2">
             <Button
               type="button"
               onClick={handleLeadAssignment}
               className="bg-blue-500 text-white w-full mt-4"
             >
-              Assign Lead
+              {isUpdateMode ? "Update Task" : "Assign Lead"}
             </Button>
           </div>
         </form>
