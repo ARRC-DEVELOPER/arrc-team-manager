@@ -217,18 +217,22 @@ const Dashboard = () => {
       </div>
 
       {/* Recent Activities */}
-      <div className="mt-6 bg-white p-4 rounded shadow">
-        <h3 className="text-lg font-bold mb-4">Recent Activities</h3>
+      <div className="mt-6 bg-white p-4 md:p-6 rounded shadow">
+        <h3 className="text-lg md:text-xl font-bold mb-4">Recent Activities</h3>
         <ul className="space-y-2">
           {recentActivities &&
             recentActivities.map((item, index) => (
-              <li className="flex justify-between">
-                <span>{item.message}</span>
-                <span className="text-sm text-gray-500">{item.timeAgo}</span>
+              <li
+                key={index}
+                className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-1 md:space-y-0"
+              >
+                <span className="text-sm md:text-base">{item.message}</span>
+                <span className="text-xs md:text-sm text-gray-500">{item.timeAgo}</span>
               </li>
             ))}
         </ul>
       </div>
+
     </div>
   );
 };

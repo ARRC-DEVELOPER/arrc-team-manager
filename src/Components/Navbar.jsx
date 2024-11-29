@@ -1,15 +1,9 @@
 import {
   GlobalOutlined,
   SettingOutlined,
-  UserOutlined
+  UserOutlined,
 } from "@ant-design/icons";
-import {
-  Avatar,
-  Button,
-  Dropdown,
-  Menu,
-  message
-} from "antd";
+import { Avatar, Button, Dropdown, Menu, message } from "antd";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
@@ -17,11 +11,10 @@ import { server } from "../main.jsx";
 import Notification from "./Notification.jsx";
 
 const Navbar = ({ user, onLogout }) => {
-  // const [isDarkMode, setIsDarkMode] = useState(false);
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    const pollInterval = 5000; 
+    const pollInterval = 5000;
 
     const fetchNotifications = async () => {
       const token = localStorage.getItem("authToken");
@@ -43,7 +36,6 @@ const Navbar = ({ user, onLogout }) => {
     fetchNotifications();
     const intervalId = setInterval(fetchNotifications, pollInterval);
 
-    // Cleanup interval on component unmount
     return () => clearInterval(intervalId);
   }, []);
 
@@ -77,29 +69,22 @@ const Navbar = ({ user, onLogout }) => {
   );
 
   return (
-    <header className="flex items-center justify-between p-4 bg-white shadow-md sticky top-0 z-10">
+    <header
+      className="flex flex-wrap items-center justify-between p-4 bg-white shadow-md sticky top-0 z-10 w-full overflow-x-hidden"
+    >
       <div className="flex items-center space-x-4 ml-auto">
-        {/* Notifications */}
         <Notification notifications={notifications} />
 
-        {/* Language Selector */}
-        <Dropdown
-          overlay={languageMenu}
-          trigger={["click"]}
-          placement="bottomRight"
-        >
-          <Button type="link" icon={<GlobalOutlined />} />
+        <Dropdown overlay={languageMenu} trigger={["click"]} placement="bottomRight">
+          <Button type="link" icon={<GlobalOutlined className="text-xl md:text-2xl" />} />
         </Dropdown>
 
-        {/* User Profile Dropdown */}
-        <Dropdown
-          overlay={userMenu}
-          trigger={["click"]}
-          placement="bottomRight"
-        >
+        <Dropdown overlay={userMenu} trigger={["click"]} placement="bottomRight">
           <div className="flex items-center">
             <Avatar size="large" icon={<UserOutlined />} />
-            <span className="ml-2">{user ? user.name : "User"}</span>{" "}
+            <span className="ml-2 hidden md:block text-sm md:text-base">
+              {user ? user.name : "User"}
+            </span>
           </div>
         </Dropdown>
       </div>

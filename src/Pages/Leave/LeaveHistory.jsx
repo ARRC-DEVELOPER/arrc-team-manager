@@ -29,7 +29,7 @@ function LeaveHistory() {
   const activeLeaves = historyLeaves.filter((leave) => leave.history);
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-lg mt-8">
+    <div className="p-6 bg-white rounded-lg shadow-lg mt-8 max-w-sm sm:max-w-full">
       {/* Modern Back Button */}
       <div className="flex items-center mb-6">
         <button

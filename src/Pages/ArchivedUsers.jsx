@@ -88,14 +88,14 @@ const ArchivedUsers = () => {
   ];
 
   return (
-    <div className="p-4">
+    <div className="p-4 max-w-sm sm:max-w-full">
       <h1 className="page__heading">Archived Users</h1>
       <Table
         columns={columns}
         dataSource={archivedUsers}
         rowKey="_id"
         pagination={false}
-        className="user-table"
+        className="user-table overflow-x-auto"
       />
     </div>
   );

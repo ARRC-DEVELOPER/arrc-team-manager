@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   MdDashboard,
   MdOutlinePendingActions,
@@ -14,7 +14,7 @@ import {
   FaUsers,
 } from "react-icons/fa";
 import { FcLeave } from "react-icons/fc";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Layout, Menu, Button } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
 import mainlogo from "../assets/mainlogo.png";
@@ -204,53 +204,62 @@ const linkData = [
 ];
 
 const Sidebar = ({ user }) => {
-  const [collapsed, setCollapsed] = React.useState(false);
+  const [visible, setVisible] = React.useState(false);
   const navigate = useNavigate();
+  const location = useLocation(); // Hook to get the current route
 
-  const toggleCollapsed = () => {
-    setCollapsed(!collapsed);
-  };
+  const toggleSidebar = () => setVisible(!visible);
 
   const filteredLinks = linkData.filter((item) =>
     user.role.permissions.includes(item.permission)
   );
 
+  // Close sidebar on route change
+  useEffect(() => {
+    setVisible(false); // Close the sidebar when the route changes
+  }, [location]);
+
   return (
     <>
+      {/* Toggle Button */}
       <Button
-        onClick={toggleCollapsed}
+        onClick={toggleSidebar}
         style={{
           position: "fixed",
           top: 16,
-          left: collapsed ? 90 : 260,
+          left: 16,
           zIndex: 20,
           color: "gray",
         }}
         icon={<MenuOutlined />}
       />
+
+      {/* Sidebar */}
       <Sider
         width={250}
         trigger={null}
         collapsible
-        collapsed={collapsed}
+        collapsed={!visible}
         style={{
           backgroundColor: "#fff",
           borderRight: "1px solid #f0f0f0",
+          display: visible ? "block" : "none", // Hide sidebar on mobile
         }}
       >
+        {/* Logo */}
         <div
-          className={`flex flex-col justify-center items-center ${
-            collapsed ? "h-16" : "h-28"
-          } transition-all duration-300`}
+          className={`flex flex-col justify-center items-center h-16 ${visible ? "block" : "hidden"
+            } transition-all duration-300`}
         >
           <img src={mainlogo} className="w-[60%] mt-2 h-auto" alt="Logo" />
         </div>
 
+        {/* Menu */}
         <Menu
           theme="light"
           mode="inline"
           defaultSelectedKeys={["dashboard"]}
-          inlineCollapsed={collapsed}
+          inlineCollapsed={!visible}
           style={{ backgroundColor: "#fff", fontWeight: "600" }}
         >
           {filteredLinks.map((item) =>

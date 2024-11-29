@@ -114,15 +114,6 @@ const Roles = () => {
 
   return (
     <div className="p-6">
-      {/* <button 
-        onClick={() => {
-          resetForm();
-          setShowModal(true);
-        }} 
-        className="mb-4 bg-blue-500 text-white px-4 py-2 rounded">
-        Add Role
-      </button>
- */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold mb-4">Role Management</h1>
 
@@ -136,15 +127,8 @@ const Roles = () => {
           Add Role
         </button>
       </div>
-      {/* <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold">Projects</h1>
-        <button onClick={() => showModal()} className="px-4 py-2 bg-blue-600 text-white rounded">
-          New Projects +
-        </button>
-      </div>
- */}
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {roles.map((role, index) => (
           <div
             key={role._id}
@@ -189,7 +173,7 @@ const Roles = () => {
 
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded w-[65%] shadow-lg">
+          <div className="bg-white p-6 rounded w-full sm:w-3/4 lg:w-2/3 xl:w-1/2 shadow-lg">
             <h2 className="text-xl font-bold mb-4">
               {isEditing ? "Edit Role" : "Add Role"}
             </h2>
@@ -206,9 +190,7 @@ const Roles = () => {
               />
             </label>
             <label className="block mb-2">Permissions:</label>
-            <div className="grid grid-cols-4 gap-4 mb-2">
-              {" "}
-              {/* Changed to 4 columns */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-2">
               {permissionsList.map((permission) => (
                 <label key={permission} className="flex items-center">
                   <input

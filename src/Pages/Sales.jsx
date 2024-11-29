@@ -11,16 +11,12 @@ const Sales = () => {
   const [leads, setLeads] = useState([]);
   const [users, setUsers] = useState([]);
   const [isUpdateMode, setIsUpdateMode] = useState(false);
-
   const [selectedLead, setSelectedLead] = useState("");
   const [selectedUsers, setSelectedUsers] = useState("");
-
   const [isModalVisibleNew, setIsModalVisibleNew] = useState(false);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState("");
   const [excelData, setExcelData] = useState(null);
-
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
   const [followUpLeads, setFollowUpLeads] = useState([]);
 
@@ -124,10 +120,14 @@ const Sales = () => {
   const notAssignedLeads = leads.filter((lead) => lead.assignedTo.length === 0);
 
   return (
-    <div>
-      <div className="flex justify-between">
-        <h2>Sales</h2>
-        <Button type="primary" onClick={() => setIsModalVisibleNew(true)}>
+    <div className="px-4 sm:px-6 lg:px-8 max-w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-center">
+        <h2 className="text-2xl font-semibold">Sales</h2>
+        <Button
+          type="primary"
+          onClick={() => setIsModalVisibleNew(true)}
+          className="mt-4 sm:mt-0"
+        >
           Assign Lead Task
         </Button>
       </div>
@@ -138,25 +138,23 @@ const Sales = () => {
           assignedLeads.map((lead) => (
             <div
               key={lead._id}
-              className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200"
+              className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200"
             >
               {/* left */}
               <div
-                className="cursor-pointer"
+                className="cursor-pointer mb-4 sm:mb-0"
                 onClick={() => handleOpenFile(lead.fileUrl, lead.originalName)}
               >
+                <p className="font-semibold text-gray-800">{lead.originalName}</p>
                 <p className="font-semibold text-gray-800">
-                  {lead.originalName}
-                </p>
-                <p className="font-semibold text-gray-800">
-                  Assinged To: {lead.assignedTo.map((i) => i.name).join(", ")}
+                  Assigned To: {lead.assignedTo.map((i) => i.name).join(", ")}
                 </p>
                 <p className="text-sm text-gray-500">
                   Updated on: {new Date(lead.updatedDate).toLocaleDateString()}
                 </p>
               </div>
 
-              <div className="flex items-center gap-6">
+              <div className="flex flex-col lg:flex-row items-center gap-6 sm:gap-4">
                 <div className="text-center">
                   <Button
                     onClick={() => openModalForUpdate(lead)}
@@ -193,7 +191,7 @@ const Sales = () => {
               </div>
 
               {/* right */}
-              <div className="flex">
+              <div className="flex gap-2">
                 <a
                   href={lead.fileUrl}
                   download
@@ -202,10 +200,9 @@ const Sales = () => {
                   <FiDownload />
                 </a>
 
-                {/* Delete Button */}
                 <button
                   onClick={() => handleDeleteLead(lead._id)}
-                  className="flex items-center justify-center p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition duration-200 ease-in-out transform hover:scale-110 ml-2"
+                  className="flex items-center justify-center p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition duration-200 ease-in-out transform hover:scale-110"
                 >
                   <FiTrash2 />
                 </button>
@@ -217,25 +214,26 @@ const Sales = () => {
         )}
       </div>
 
-      {/* Modal for add new leads */}
+      {/* Modal for Add/Update Leads */}
       <Modal
-        title={isUpdateMode ? "Update Task" : "Add Task"}
+        title={isUpdateMode ? "Update Task" : "Assign Lead Task"}
         visible={isModalVisibleNew}
         onCancel={handleCancel}
         footer={null}
+        width="90%"
+        className="max-w-lg"
       >
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Select Lead */}
-          <div>
+        <form>
+          <div className="mb-4">
             <label className="block mb-2 font-semibold text-gray-700">
-              Select Lead
+              Select a Lead
             </label>
             <select
               value={selectedLead}
               onChange={(e) => setSelectedLead(e.target.value)}
-              className="form-select border border-gray-300 rounded-md p-3 w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none"
             >
-              <option value="">Select Lead</option>
+              <option value="">Select a Lead</option>
               {notAssignedLeads.map((lead) => (
                 <option key={lead._id} value={lead._id}>
                   {lead.originalName}
@@ -244,22 +242,13 @@ const Sales = () => {
             </select>
           </div>
 
-          {/* Assign To Users */}
+          {/* Select Users */}
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">
-              Assign To Users*
-            </label>
+            <label className="block mb-2 font-semibold text-gray-700">Select Users</label>
             <select
-              name="assignedTo"
               value={selectedUsers}
-              onChange={(e) => {
-                const options = Array.from(
-                  e.target.selectedOptions,
-                  (option) => option.value
-                );
-                setSelectedUsers(options);
-              }}
-              className="form-select border border-gray-300 rounded-md p-3 w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => setSelectedUsers(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none"
               multiple
             >
               {filteredUsers.map((user) => (
@@ -268,131 +257,55 @@ const Sales = () => {
                 </option>
               ))}
             </select>
-
-            {/* Display selected users */}
-            <div className="mt-4">
-              <h4 className="font-semibold text-gray-600">Selected Users:</h4>
-              <ul>
-                {selectedUsers.length > 0 ? (
-                  selectedUsers.map((userId) => {
-                    const user = filteredUsers.find(
-                      (user) => user._id === userId
-                    );
-                    return <li key={userId}>{user?.name}</li>;
-                  })
-                ) : (
-                  <li>No users selected</li>
-                )}
-              </ul>
-            </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="col-span-2">
+          <div className="flex justify-between mt-4">
+            <Button onClick={handleCancel} className="w-full sm:w-auto" type="default">
+              Cancel
+            </Button>
             <Button
-              type="button"
+              type="primary"
+              className="w-full sm:w-auto"
               onClick={handleLeadAssignment}
-              className="bg-blue-500 text-white w-full mt-4"
             >
-              {isUpdateMode ? "Update Task" : "Assign Lead"}
+              {isUpdateMode ? "Update" : "Assign"}
             </Button>
           </div>
         </form>
       </Modal>
 
-      {/* Modal for Excel File Preview */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full md:w-4/5 lg:w-3/5 p-6 overflow-auto max-h-[80vh]">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-teal-600">
-                Preview of {selectedFileName}
-              </h3>
-              <button
-                onClick={handleCloseModal}
-                className="text-gray-600 hover:text-gray-900 font-semibold"
-              >
-                X
-              </button>
-            </div>
-            <table className="w-full border-collapse border border-gray-300 mb-4">
-              <tbody>
-                {excelData.map((row, rowIndex) => (
-                  <tr key={rowIndex} className="border-b hover:bg-gray-50">
-                    {row.map((cell, cellIndex) => (
-                      <td
-                        key={cellIndex}
-                        className="p-2 border border-gray-300 text-sm text-gray-700"
-                      >
-                        {cell}
-                      </td>
-                    ))}
+      {/* Excel File Modal */}
+      <Modal
+        title="Excel Data"
+        visible={isModalOpen}
+        onCancel={handleCloseModal}
+        footer={null}
+        width="90%"
+        className="max-w-xl"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full table-auto">
+            <thead>
+              <tr>
+                <th className="p-2 border-b">#</th>
+                <th className="p-2 border-b">Name</th>
+                <th className="p-2 border-b">Age</th>
+                <th className="p-2 border-b">City</th>
+              </tr>
+            </thead>
+            <tbody>
+              {excelData &&
+                excelData.map((row, index) => (
+                  <tr key={index}>
+                    <td className="p-2 border-b">{index + 1}</td>
+                    <td className="p-2 border-b">{row[0]}</td>
+                    <td className="p-2 border-b">{row[1]}</td>
+                    <td className="p-2 border-b">{row[2]}</td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
-            <div className="flex justify-end">
-              <button
-                onClick={handleCloseModal}
-                className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700"
-              >
-                Close
-              </button>
-            </div>
-          </div>
+            </tbody>
+          </table>
         </div>
-      )}
-
-      {/* Follow-Up Leads Modal */}
-      <Modal
-        title="Follow-Up Leads"
-        visible={isFollowUpModalOpen}
-        onCancel={handleCloseFollowUpModal}
-        footer={null}
-      >
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr>
-              <th className="p-2 border border-gray-300">Client Name</th>
-              <th className="p-2 border border-gray-300">Mobile Number</th>
-              <th className="p-2 border border-gray-300">City</th>
-              <th className="p-2 border border-gray-300">Follow-Up Date</th>
-              <th className="p-2 border border-gray-300">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {followUpLeads.length > 0 ? (
-              followUpLeads.map((followUp, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="p-2 border border-gray-300">
-                    {followUp["Calinet Name"]}
-                  </td>
-                  <td className="p-2 border border-gray-300">
-                    {followUp["Mobile Number"]}
-                  </td>
-                  <td className="p-2 border border-gray-300">
-                    {followUp.City}
-                  </td>
-                  <td className="p-2 border border-gray-300">
-                    {followUp["Follow-up Date"]}
-                  </td>
-                  <td className="p-2 border border-gray-300">
-                    {followUp.Status}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="5"
-                  className="text-center text-gray-500 py-4 border border-gray-300"
-                >
-                  No follow-up leads found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
       </Modal>
     </div>
   );

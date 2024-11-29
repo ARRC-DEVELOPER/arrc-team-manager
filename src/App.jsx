@@ -80,7 +80,7 @@ const AppContent = ({
   }, [isLoading, isAuthenticated]);
 
   return (
-    <div className="flex h-full w-full border border-gray-100">
+    <div className="flex h-full w-full border border-gray-100 overflow-x-hidden">
       {isAuthenticated && loggedInUser && <Sidebar user={loggedInUser} />}
       <div className="flex flex-col flex-1">
         {isAuthenticated && (

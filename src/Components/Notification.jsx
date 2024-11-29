@@ -29,7 +29,7 @@ const Notification = ({ notifications }) => {
   const showNotificationModal = () => {
     setIsModalVisible(true);
   };
-  
+
   const handleCancel = () => {
     markNotificationsAsRead();
     setIsModalVisible(false);
@@ -53,7 +53,6 @@ const Notification = ({ notifications }) => {
 
   return (
     <>
-      {/* Notification Bell with Badge */}
       <Badge count={unreadNotificationsCount}>
         <Button
           type="link"
@@ -62,7 +61,6 @@ const Notification = ({ notifications }) => {
         />
       </Badge>
 
-      {/* Modal for Notifications */}
       <Modal
         title="Notifications"
         visible={isModalVisible}
@@ -74,15 +72,9 @@ const Notification = ({ notifications }) => {
           dataSource={unreadNotifications}
           renderItem={(notification) => (
             <List.Item>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  width: "100%",
-                }}
-              >
+              <div className="flex justify-between w-full">
                 <a href="#!">{notification.message}</a>
-                <span style={{ marginLeft: "auto", color: "#888" }}>
+                <span className="ml-auto text-gray-500">
                   {formatTime(notification.createdAt)}
                 </span>
               </div>

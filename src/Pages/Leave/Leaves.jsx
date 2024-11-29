@@ -102,7 +102,7 @@ function Leaves() {
   const activeLeaves = leaves.filter((leave) => !leave.history);
 
   return (
-    <div className="p-4 bg-gray-100 rounded-lg shadow-lg">
+    <div className="p-4 bg-gray-100 rounded-lg shadow-lg max-w-sm sm:max-w-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold text-gray-800">Leave Requests</h2>
         <div className="space-x-2">

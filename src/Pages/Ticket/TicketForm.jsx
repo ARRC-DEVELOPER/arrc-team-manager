@@ -109,14 +109,6 @@ function TicketForm() {
               placeholder="Description"
               className="mt-2 border p-2 rounded w-full"
             ></textarea>
-            {/* <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="mt-2 border p-2 rounded w-full"
-            >
-              <option value="software">Software</option>
-              <option value="hardware">Hardware</option>
-            </select> */}
             <input
               type="file"
               onChange={handleFileChange}
