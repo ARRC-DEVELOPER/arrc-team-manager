@@ -152,9 +152,9 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="p-4">
       {/* Header */}
-      <header className="flex justify-between items-center bg-white p-4 rounded shadow">
+      <header className="flex flex-col sm:flex-row justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-gray-700">
           Task Manager Dashboard
         </h1>
@@ -211,7 +211,7 @@ const Dashboard = () => {
       </div>
 
       {/* Line Chart for User Performance */}
-      <div className="bg-white mt-5 p-4 rounded shadow">
+      <div className="bg-white mt-5 p-4 w-[95%] rounded shadow">
         <h3 className="text-lg font-bold mb-4">User Performance Over Time</h3>
         <Line data={lineData} />
       </div>
@@ -232,7 +232,6 @@ const Dashboard = () => {
             ))}
         </ul>
       </div>
-
     </div>
   );
 };
