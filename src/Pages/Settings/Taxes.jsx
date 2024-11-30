@@ -254,79 +254,65 @@ const Taxes = () => {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {currentTaxes.map((tax, index) => (
-            <div
-              key={index}
-              className="relative bg-white p-4 border rounded shadow-md hover:shadow-lg transition-shadow duration-300"
-            >
-              <div className="absolute top-2 right-2">
-                <button onClick={() => handleEllipsisClick(index)}>
-                  &#x22EE;
+            <div key={tax._id} className="bg-white p-4 rounded-lg shadow-md">
+              <div className="flex justify-between items-center">
+                <h3 className="font-semibold text-lg">{tax.name}</h3>
+                <button
+                  onClick={() => handleEllipsisClick(index)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <i className="fas fa-ellipsis-h"></i>
                 </button>
+              </div>
+              <p className="text-sm text-gray-500">Rate: {tax.rate}%</p>
 
-                {dropdownVisible === index && (
-                  <div className="absolute right-0 mt-2 w-24 bg-white border border-gray-300 rounded shadow-lg">
-                    <button
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-right"
+              {dropdownVisible === index && (
+                <div className="absolute bg-white shadow-lg rounded-lg mt-2 w-40 p-2">
+                  <ul>
+                    <li
                       onClick={() => handleEditClick(tax)}
+                      className="py-1 px-2 text-sm text-blue-600 hover:bg-gray-100 cursor-pointer"
                     >
                       Edit
-                    </button>
-                    <button
-                      className="block px-4 py-2 text-sm text-red-700 hover:bg-gray-100 w-full text-right"
+                    </li>
+                    <li
                       onClick={() => handleDeleteClick(tax._id)}
+                      className="py-1 px-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
                     >
                       Delete
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <h2 className="text-lg font-semibold">{tax.name}</h2>
-              <p className="text-sm">Rate: {tax.rate}%</p>
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
 
-      <div className="mt-4 flex justify-end w-full">
-        {currentPage > 1 && (
+      {/* Pagination */}
+      <div className="flex justify-center mt-6">
+        <nav className="flex space-x-2">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
-            className="px-3 py-2 mx-1 border rounded border-gray-300 hover:bg-gray-100"
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md"
           >
-            Previous
+            Prev
           </button>
-        )}
-        {Array.from({ length: totalPages }, (_, index) => (
-          <button
-            key={index}
-            onClick={() => handlePageChange(index + 1)}
-            className={`px-3 py-2 mx-1 border rounded ${
-              currentPage === index + 1
-                ? "bg-blue-600 text-white"
-                : "border-gray-300 hover:bg-gray-100"
-            }`}
-          >
-            {index + 1}
-          </button>
-        ))}
-        {currentPage < totalPages && (
+          <span className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md">
+            {currentPage} / {totalPages}
+          </span>
           <button
             onClick={() => handlePageChange(currentPage + 1)}
-            className="px-3 py-2 mx-1 border rounded border-gray-300 hover:bg-gray-100"
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md"
           >
             Next
           </button>
-        )}
+        </nav>
       </div>
-
-      <p className="mt-4">
-        Showing {startIndex + 1} -{" "}
-        {Math.min(startIndex + itemsPerPage, filteredTaxes.length)} of{" "}
-        {filteredTaxes.length}
-      </p>
     </div>
   );
 };

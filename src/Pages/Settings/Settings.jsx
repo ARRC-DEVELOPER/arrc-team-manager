@@ -278,7 +278,7 @@ const Settings = () => {
     <div className="p-5">
       {/* Buttons to open different settings modals */}
       {formType === "general" && (
-        <div className="flex justify-end mb-4 space-x-4">
+        <div className="flex flex-wrap gap-2 justify-end mb-4 space-x-4">
           <Button type="primary" onClick={() => handleOpen("general")}>
             General
           </Button>

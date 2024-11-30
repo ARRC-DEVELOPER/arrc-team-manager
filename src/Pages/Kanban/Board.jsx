@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-// importing compoentns
+// importing components
 import BurnBarrel from "./BurnBarrel";
 import Column from "./Column";
 
 // importing data
-// import DEFAULT_CARDS from "./data";
 import { server } from "../../main";
 import AddTask from "./AddTask";
 
@@ -16,7 +15,7 @@ const Board = () => {
   const [editingTask, setEditingTask] = useState(null);
 
   const handleEditTask = (task) => {
-    console.log("Edditing task: ", task);
+    console.log("Editing task: ", task);
     setEditingTask(task);
   };
 
@@ -68,7 +67,7 @@ const Board = () => {
         setEditingTask={setEditingTask}
       />
 
-      <div className="flex h-full w-full gap-3 overflow-scroll p-12">
+      <div className="flex flex-wrap h-full justify-center align-middle w-full gap-3 overflow-x-auto p-12 space-y-4 md:space-y-0">
         {statuses.map((status) => (
           <Column
             key={status._id}

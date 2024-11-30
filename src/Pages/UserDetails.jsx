@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaCheckCircle, FaHourglassHalf } from "react-icons/fa";
 import { useParams } from "react-router-dom";
-import { Progress } from "antd";
+import { Progress, message } from "antd";
 import { server } from "../main";
 
 const UserDetails = () => {
@@ -96,13 +96,13 @@ const UserDetails = () => {
     <div className="flex flex-col items-center bg-gradient-to-r from-blue-100 to-purple-100 min-h-screen py-8 px-6 space-y-10">
       {/* User Profile and Overview */}
       <div className="bg-white w-full max-w-4xl rounded-lg shadow-lg p-8 space-y-6 transition-transform transform hover:scale-105">
-        <div className="flex items-center space-x-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6">
           <img
             src={user.profilePicture}
             alt={user.name}
             className="w-24 h-24 rounded-full object-cover border-4 border-purple-300 shadow-lg"
           />
-          <div>
+          <div className="mt-4 sm:mt-0">
             <h2 className="text-3xl font-bold text-purple-700">{user.name}</h2>
             <p className="text-gray-600">{user.email}</p>
             <p className="text-gray-600">Phone: {user.phone}</p>
@@ -128,7 +128,7 @@ const UserDetails = () => {
       {/* Performance Overview */}
       <div className="bg-white w-full max-w-4xl rounded-lg shadow-lg p-8 space-y-6 transform hover:scale-105">
         <h3 className="text-2xl font-semibold text-purple-600">Performance Overview</h3>
-        <div className="flex justify-between items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {/* Task Completion */}
           <div className="text-center">
             <Progress
@@ -170,7 +170,7 @@ const UserDetails = () => {
       {/* Task Summary */}
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg p-8 space-y-6 transition-transform transform hover:scale-105">
         <h3 className="text-2xl font-semibold text-purple-600">Task Summary</h3>
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="text-center">
             <h4 className="text-4xl font-bold text-gray-900">
               {performance.totalTasks}
@@ -196,7 +196,7 @@ const UserDetails = () => {
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg p-8 space-y-6 transition-transform transform hover:scale-105">
         <h3 className="text-2xl font-semibold mb-4 text-purple-600">Tasks</h3>
 
-        <div className="flex gap-5">
+        <div className="flex flex-col sm:flex-row gap-5">
           {/* Completed Tasks */}
           <div className="mb-6 w-full">
             <h4 className="text-xl font-semibold mb-2">Completed Tasks</h4>
@@ -245,13 +245,7 @@ const UserDetails = () => {
                       ></p>
                     </div>
                   </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      task.statusId.name === "In Progress"
-                        ? "bg-yellow-200 text-yellow-800"
-                        : "bg-gray-200 text-gray-800"
-                    }`}
-                  >
+                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-yellow-200 text-yellow-800">
                     {task.statusId.name}
                   </span>
                 </div>

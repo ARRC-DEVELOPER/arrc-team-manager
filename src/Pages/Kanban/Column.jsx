@@ -134,7 +134,7 @@ const Column = ({
   const filteredCards = cards.filter((card) => card.statusId._id == statusId);
 
   return (
-    <div className="w-56 shrink-0">
+    <div className="w-full sm:w-56 shrink-0">
       <div className="mb-3 flex items-center justify-between">
         <h3 className={`font-medium ${headingColor}`}>{title}</h3>
         <span className="rounded text-sm text-neutral-500">
