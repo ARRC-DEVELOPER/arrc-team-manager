@@ -32,8 +32,13 @@ const Board = () => {
   console.log("Status Data: ", statuses);
 
   const fetchTasks = async () => {
+    const token = localStorage.getItem("authToken");
+
     try {
-      const response = await axios.get(`${server}/tasks`);
+      const response = await axios.get(`${server}/tasks`, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
       setCards(response.data);
     } catch (error) {
       console.error("Error fetching tasks", error);
@@ -51,7 +56,7 @@ const Board = () => {
   };
 
   useEffect(() => {
-    const fetchData = async () => { 
+    const fetchData = async () => {
       await fetchTasks();
       await fetchStatuses();
     };
@@ -78,10 +83,10 @@ const Board = () => {
               status.name === "TODO"
                 ? "text-yellow-500"
                 : status.name === "In Progress"
-                ? "text-blue-500"
-                : status.name === "Complete"
-                ? "text-emerald-500"
-                : "text-neutral-500"
+                  ? "text-blue-500"
+                  : status.name === "Complete"
+                    ? "text-emerald-500"
+                    : "text-neutral-500"
             }
             cards={cards}
             setCards={setCards}

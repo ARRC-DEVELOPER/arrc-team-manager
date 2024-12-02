@@ -42,9 +42,15 @@ const Projects = () => {
   }, [currentPage]);
 
   const fetchProjects = async () => {
+    const token = localStorage.getItem("authToken");
+
     try {
-      const response = await axios.get(`${server}/projects`);
-      setProjects(Array.isArray(response.data) ? response.data : []);
+      const response = await axios.get(`${server}/projectsByUser`, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
+
+      setProjects(Array.isArray(response.data.projects) ? response.data.projects : []);
     } catch (error) {
       console.error("Error fetching projects:", error);
       message.error("Failed to fetch projects");

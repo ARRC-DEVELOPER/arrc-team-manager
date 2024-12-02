@@ -69,7 +69,7 @@ const linkData = [
         icon: <MdOutlinePendingActions style={{ color: "#faad14" }} />,
         label: "Status",
         to: "/tasks/status",
-        permission: "Manage Tasks",
+        permission: "Manage Status",
       },
     ],
   },
@@ -210,9 +210,21 @@ const Sidebar = ({ user }) => {
 
   const toggleSidebar = () => setVisible(!visible);
 
-  const filteredLinks = linkData.filter((item) =>
-    user.role.permissions.includes(item.permission)
-  );
+  const filteredLinks = linkData
+    .filter((item) => user.role.permissions.includes(item.permission))
+    .map((item) => {
+      if (item.children) {
+        const filteredChildren = item.children.filter((child) =>
+          user.role.permissions.includes(child.permission)
+        );
+        return filteredChildren.length > 0
+          ? { ...item, children: filteredChildren }
+          : null;
+      }
+      return item;
+    })
+    .filter(Boolean);
+
 
   // Close sidebar on route change
   useEffect(() => {

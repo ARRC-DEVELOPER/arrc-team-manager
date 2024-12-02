@@ -70,6 +70,8 @@ const AppContent = ({
           navigate("/tasks");
         } else if (lastPath && lastPath !== "/login" && lastPath !== "/") {
           navigate(lastPath);
+        } else if (loggedInUser?.role?.name === "Telecaller") {
+          navigate("/sales");
         } else {
           navigate("/dashboard");
         }
@@ -115,7 +117,7 @@ const AppContent = ({
                 {/* <Route path="/reports" element={<Reports />} /> */}
 
                 {loggedInUser.role.name === "Admin" ||
-                loggedInUser.role.name === "Manager" ? (
+                  loggedInUser.role.name === "Manager" ? (
                   <Route path="/tickets" element={<TicketList />} />
                 ) : (
                   <Route path="/tickets" element={<TicketForm />} />
@@ -124,7 +126,7 @@ const AppContent = ({
                 <Route path="/ticket-history" element={<TicketHistory />} />
 
                 {loggedInUser.role.name === "Admin" ||
-                loggedInUser.role.name === "Manager" ? (
+                  loggedInUser.role.name === "Manager" ? (
                   <Route path="/leaves" element={<Leaves />} />
                 ) : (
                   <Route path="/leaves" element={<LeaveForm />} />
@@ -139,7 +141,7 @@ const AppContent = ({
                 <Route path="/leads" element={<Leads />} />
 
                 {loggedInUser.role.name === "Admin" ||
-                loggedInUser.role.name === "Manager" ? (
+                  loggedInUser.role.name === "Manager" ? (
                   <Route path="/sales" element={<Sales />} />
                 ) : (
                   <Route path="/sales" element={<LeadTask />} />
