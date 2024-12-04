@@ -50,6 +50,8 @@ import LeadTask from "./Pages/LeadTask";
 import Leaves from "./Pages/Leave/Leaves";
 import LeaveForm from "./Pages/Leave/LeaveForm";
 import LeaveHistory from "./Pages/Leave/LeaveHistory";
+import { loadUserRedux } from "./redux/actions/user";
+import { useDispatch } from "react-redux";
 
 const AppContent = ({
   isAuthenticated,
@@ -65,11 +67,11 @@ const AppContent = ({
     if (!isLoading) {
       if (isAuthenticated) {
         const lastPath = localStorage.getItem("lastPath");
-
-        if (loggedInUser?.role?.name === "User") {
-          navigate("/tasks");
-        } else if (lastPath && lastPath !== "/login" && lastPath !== "/") {
+        
+        if (lastPath && lastPath !== "/login" && lastPath !== "/") {
           navigate(lastPath);
+        } else if (loggedInUser?.role?.name === "User") {
+          navigate("/tasks");
         } else if (loggedInUser?.role?.name === "Telecaller") {
           navigate("/sales");
         } else {
@@ -179,6 +181,8 @@ const App = () => {
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const dispatch = useDispatch();
+
   async function fetchVapidPublicKey() {
     try {
       const response = await axios.get(`${server}/auth/getVapidPublicKey`);
@@ -266,7 +270,8 @@ const App = () => {
 
   useEffect(() => {
     loadUser();
-  }, []);
+    dispatch(loadUserRedux());
+  }, [dispatch]);
 
   const handleLogin = (user) => {
     setIsAuthenticated(true);

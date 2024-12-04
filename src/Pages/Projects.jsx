@@ -21,12 +21,14 @@ import ReactQuill from "react-quill"; // Import ReactQuill for the description f
 import "react-quill/dist/quill.snow.css"; // Import styles for ReactQuill
 import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
 import { server } from "../main";
+import { useSelector } from "react-redux";
 
 const { Option } = Select;
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
-  const [users, setUsers] = useState([]); // State to store users
+  const [users, setUsers] = useState([]); 
+  const [clients, setClients] = useState([]); // State to store clients
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState(null);
@@ -35,10 +37,13 @@ const Projects = () => {
   const [pageSize] = useState(6); // Set the page size (6 projects per page)
   const navigate = useNavigate(); // Initialize useNavigate hook
 
-  // Fetch projects and users from the backend
+  const { user } = useSelector((state) => state.user);
+
+  // Fetch projects, users, and clients from the backend
   useEffect(() => {
     fetchProjects();
     fetchUsers();
+    fetchClients();
   }, [currentPage]);
 
   const fetchProjects = async () => {
@@ -67,16 +72,26 @@ const Projects = () => {
     }
   };
 
+  const fetchClients = async () => {
+    try {
+      const response = await axios.get(`${server}/users/getAllClients`);
+      setClients(response.data); 
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+      message.error("Failed to fetch clients");
+    }
+  };
+
   // Open the form modal
   const showModal = (project = null) => {
     if (project) {
       form.setFieldsValue({
         name: project.name,
         prefix: project.prefix,
-        client: project.client,
+        client: project.client?._id,
         color: project.color,
         assignees: project.users,
-        description: project.description, // Set description for editing
+        description: project.description,
       });
       setCurrentProjectId(project._id);
       setIsEditing(true);
@@ -144,23 +159,16 @@ const Projects = () => {
 
   return (
     <div className="container py-4">
-      {/* <h1 className="text-2xl font-bold mb-4 text-gray-800">Projects</h1>
-      {/* <Button type="primary" className="mb-4" onClick={() => showModal()}>
-        New Project
-      </Button> */}
-      {/* <div className="flex justify-end">
-  <Button type="primary" className="mb-4" onClick={() => showModal()}>
-    New Project
-  </Button>
-</div> */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-3xl font-bold">Projects</h1>
-        <button
-          onClick={() => showModal()}
-          className="px-4 py-2 bg-blue-600 text-white rounded"
-        >
-          New Projects +
-        </button>
+        {user.role.name === "Admin" || user.role.name === "Manager" ? (
+          <button
+            onClick={() => showModal()}
+            className="px-4 py-2 bg-blue-600 text-white rounded"
+          >
+            New Projects +
+          </button>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -180,14 +188,15 @@ const Projects = () => {
                   </span>
                 </div>
               }
-              actions={[
-                <EditOutlined key="edit" onClick={() => showModal(project)} />,
-                <DeleteOutlined
-                  key="delete"
-                  onClick={() => deleteProject(project._id)}
-                />,
-                <EllipsisOutlined key="ellipsis" />,
-              ]}
+              actions={
+                user.role.name === "Admin" || user.role.name === "Manager"
+                  ? [
+                      <EditOutlined key="edit" onClick={() => showModal(project)} />,
+                      <DeleteOutlined key="delete" onClick={() => deleteProject(project._id)} />,
+                      <EllipsisOutlined key="ellipsis" />,
+                    ]
+                  : []
+              }
             >
               <div className="flex justify-between items-center mb-2">
                 <Progress
@@ -209,7 +218,7 @@ const Projects = () => {
               </p>
 
               <div className="flex justify-between items-center">
-                <span>Client: {project.client}</span>
+                <span>Client: {project.client?.name}</span>
                 <div className="flex space-x-2">
                   {Array.isArray(project.assignees) &&
                     project.assignees.map((user) => (
@@ -268,21 +277,25 @@ const Projects = () => {
           <Form.Item
             name="client"
             label="Client"
-            rules={[{ required: true, message: "Please enter client name" }]}
+            rules={[{ required: true, message: "Please select a client" }]}
           >
-            <Input placeholder="Enter client name" />
+            <Select placeholder="Select a client">
+              {clients.map((client) => (
+                <Option key={client._id} value={client._id}>
+                  {client.name}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
 
-          {/* Color Picker */}
-          <Form.Item name="color" label="Color">
-            <input
-              type="color"
-              onChange={(e) => form.setFieldsValue({ color: e.target.value })} // Set color value
-              className="rounded w-16 h-10 border border-gray-300"
-            />
+          <Form.Item
+            name="color"
+            label="Color"
+            rules={[{ required: true, message: "Please enter color" }]}
+          >
+            <Input type="color" />
           </Form.Item>
 
-          {/* Users Dropdown */}
           <Form.Item
             name="assignees"
             label="Assign Users"
@@ -290,16 +303,15 @@ const Projects = () => {
           >
             <Select mode="multiple" placeholder="Select users">
               {users.map((user) => (
-                <Option key={user._id} value={user.username}>
-                  {user.username}
+                <Option key={user._id} value={user._id}>
+                  {user.name}
                 </Option>
               ))}
             </Select>
           </Form.Item>
 
-          {/* Description Field */}
           <Form.Item name="description" label="Description">
-            <ReactQuill placeholder="Add project description" theme="snow" />
+            <ReactQuill theme="snow" placeholder="Enter project description" />
           </Form.Item>
         </Form>
       </Modal>

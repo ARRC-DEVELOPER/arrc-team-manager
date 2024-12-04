@@ -8,6 +8,7 @@ import Column from "./Column";
 // importing data
 import { server } from "../../main";
 import AddTask from "./AddTask";
+import { useSelector } from "react-redux";
 
 const Board = () => {
   const [cards, setCards] = useState([]);
@@ -64,13 +65,23 @@ const Board = () => {
     fetchData();
   }, []);
 
+  const { user } = useSelector(
+    state => state.user
+  );
+
   return (
     <>
-      <AddTask
-        setCards={setCards}
-        editingTask={editingTask}
-        setEditingTask={setEditingTask}
-      />
+      {
+        user.role.name == "Admin" || user.role.name == "Manager" ? (
+          <AddTask
+            setCards={setCards}
+            editingTask={editingTask}
+            setEditingTask={setEditingTask}
+          />
+        ) : (
+          <></>
+        )
+      }
 
       <div className="flex flex-wrap h-full justify-center align-middle w-full gap-3 overflow-x-auto p-12 space-y-4 md:space-y-0">
         {statuses.map((status) => (

@@ -5,6 +5,7 @@ import { EllipsisOutlined } from "@ant-design/icons";
 
 // importing components
 import DropIndicator from "./DropIndicator";
+import { useSelector } from "react-redux";
 
 const Card = ({
   title,
@@ -46,6 +47,10 @@ const Card = ({
     }
   };
 
+  const { user } = useSelector(
+    state => state.user
+  );
+
   const menu = (
     <Menu onClick={handleMenuClick}>
       <Menu.Item key="edit" style={{ color: "blue" }}>
@@ -72,9 +77,14 @@ const Card = ({
         <div className="flex justify-between items-start">
           <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
 
-          <Dropdown overlay={menu} trigger={["click"]}>
-            <EllipsisOutlined className="absolute bottom-2 right-2 text-red-500 hover:text-blue-700 cursor-pointer text-xl font-bold" />
-          </Dropdown>
+          {
+            user.role.name == "Admin" || user.role.name == "Manager" && (
+              <Dropdown overlay={menu} trigger={["click"]}>
+                <EllipsisOutlined className="absolute bottom-2 right-2 text-red-500 hover:text-blue-700 cursor-pointer text-xl font-bold" />
+              </Dropdown>
+            )
+          }
+
 
           <div className="flex items-center gap-2">
             <span className="bg-blue-100 text-blue-500 text-xs font-medium px-2.5 py-1 rounded-md">

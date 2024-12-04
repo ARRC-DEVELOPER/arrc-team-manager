@@ -108,11 +108,11 @@ const Users = () => {
     try {
       const response = editingUser
         ? await axios.put(`${server}/users/${editingUser._id}`, formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-          })
+          headers: { "Content-Type": "multipart/form-data" },
+        })
         : await axios.post(`${server}/users`, formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       message.success(
         editingUser ? "User updated successfully" : "User created successfully"
       );

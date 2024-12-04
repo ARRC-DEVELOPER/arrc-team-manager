@@ -77,10 +77,13 @@ export const login = (email, password) => async (dispatch) => {
   }
 };
 
-export const loadUser = () => async (dispatch) => {
+export const loadUserRedux = () => async (dispatch) => {
+  const token = localStorage.getItem("authToken");
+
   try {
     dispatch(loadUserRequest());
-    const { data } = await axios.get(`${server}/user/getMyProfile`, {
+    const { data } = await axios.get(`${server}/auth/getMyProfile`, {
+      headers: { Authorization: `Bearer ${token}` },
       withCredentials: true,
     });
 
