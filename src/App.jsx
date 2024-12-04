@@ -52,6 +52,9 @@ import LeaveForm from "./Pages/Leave/LeaveForm";
 import LeaveHistory from "./Pages/Leave/LeaveHistory";
 import { loadUserRedux } from "./redux/actions/user";
 import { useDispatch } from "react-redux";
+import Notes from "./Pages/Notes/Notes";
+import NoteForm from "./Pages/Notes/NoteForm";
+import NoteHistory from "./Pages/Notes/NoteHistory";
 
 const AppContent = ({
   isAuthenticated,
@@ -67,7 +70,7 @@ const AppContent = ({
     if (!isLoading) {
       if (isAuthenticated) {
         const lastPath = localStorage.getItem("lastPath");
-        
+
         if (lastPath && lastPath !== "/login" && lastPath !== "/") {
           navigate(lastPath);
         } else if (loggedInUser?.role?.name === "User") {
@@ -126,6 +129,15 @@ const AppContent = ({
                 )}
 
                 <Route path="/ticket-history" element={<TicketHistory />} />
+
+                {loggedInUser.role.name === "Admin" ||
+                  loggedInUser.role.name === "Manager" ? (
+                  <Route path="/notes" element={<Notes />} />
+                ) : (
+                  <Route path="/notes" element={<NoteForm />} />
+                )}
+
+                <Route path="/note-history" element={<NoteHistory />} />
 
                 {loggedInUser.role.name === "Admin" ||
                   loggedInUser.role.name === "Manager" ? (

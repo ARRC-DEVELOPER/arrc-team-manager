@@ -144,6 +144,13 @@ const linkData = [
     permission: "Manage Tickets",
   },
   {
+    key: "notes",
+    icon: <FaTicketAlt style={{ color: "#13c2c2" }} />,
+    label: "Daily Notes",
+    to: "/notes",
+    permission: "Manage Tickets",
+  },
+  {
     key: "leave",
     icon: <FcLeave style={{ color: "#13c2c2" }} />,
     label: "Leaves",
