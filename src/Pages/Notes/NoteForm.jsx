@@ -82,6 +82,29 @@ const NotesSection = () => {
     const [loading, setLoading] = useState(false);
     const [loadingProjects, setLoadingProjects] = useState(false);
 
+    const fetchNotes = async (projectId = null) => {
+        const token = localStorage.getItem("authToken");
+        setLoading(true);
+        try {
+            const endpoint = projectId
+                ? `${server}/notes/getNotesByProject/${projectId}`
+                : `${server}/notes/getNotesByClientId`;
+
+            const response = await axios.get(endpoint, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            setNotes(response.data.notes);
+        } catch (error) {
+            console.error("Error fetching notes:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     const fetchProjects = async () => {
         setLoadingProjects(true);
         try {
@@ -94,27 +117,14 @@ const NotesSection = () => {
             setProjects(Array.isArray(response.data.projects) ? response.data.projects : []);
         } catch (error) {
             console.error("Error fetching projects:", error);
-            message.error("Failed to fetch projects");
         } finally {
             setLoadingProjects(false);
         }
     };
 
-    const fetchNotes = async () => {
-        const token = localStorage.getItem("authToken");
-        setLoading(true);
-        try {
-            const response = await axios.get(`${server}/notes/getNotesByClientId`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            setNotes(response.data.notes);
-        } catch (error) {
-            console.error("Error fetching notes:", error);
-        } finally {
-            setLoading(false);
-        }
+    const handleProjectChange = (projectId) => {
+        setSelectedProject(projectId);
+        fetchNotes(projectId);
     };
 
     useEffect(() => {
@@ -125,6 +135,7 @@ const NotesSection = () => {
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
             <h2 className="text-2xl font-bold mb-4">Notes</h2>
+
             {/* Project Dropdown */}
             {loadingProjects ? (
                 <p>Loading projects...</p>
@@ -133,12 +144,10 @@ const NotesSection = () => {
                     <label className="block mb-2 text-gray-600">Select Project:</label>
                     <select
                         className="w-full p-2 border rounded-md"
-                        value={selectedProject}
-                        onChange={(e) => setSelectedProject(e.target.value)}
+                        value={selectedProject || ""}
+                        onChange={(e) => handleProjectChange(e.target.value)}
                     >
-                        <option>
-                            {"select project"}
-                        </option>
+                        <option value="">All Projects</option>
                         {projects.map((project) => (
                             <option key={project._id} value={project._id}>
                                 {project.name}
@@ -150,7 +159,7 @@ const NotesSection = () => {
 
             {/* Add Note Section */}
             {selectedProject && (
-                <AddNote projectId={selectedProject} fetchNotes={fetchNotes} />
+                <AddNote projectId={selectedProject} fetchNotes={() => fetchNotes(selectedProject)} />
             )}
 
             {loading ? (

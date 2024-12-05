@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from "react";
 import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css"; // Import Quill's styles
+import "react-quill/dist/quill.snow.css";
 import axios from "axios";
-import "../Components/css/Shimmer.css"; // For shimmer effect
+import "../Components/css/Shimmer.css";
 import { server } from "../main";
+import {
+  Button,
+  Menu,
+  Dropdown,
+  Modal,
+  Input,
+} from "antd";
+import {
+  EllipsisOutlined,
+} from "@ant-design/icons";
 
 const Departments = () => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [departments, setDepartments] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,19 +25,18 @@ const Departments = () => {
     color: "",
     description: "",
   });
-  const [showForm, setShowForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
-  const [dropdownVisible, setDropdownVisible] = useState(null);
-  const [loading, setLoading] = useState(true); // For shimmer effect
+  const [loading, setLoading] = useState(true);
 
   const itemsPerPage = 12;
 
-  // Fetch departments from the backend
+  console.log(newDepartment);
+
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        setLoading(true); // Start shimmer effect
+        setLoading(true);
 
         const response = await axios.get(`${server}/departments`);
         if (Array.isArray(response.data)) {
@@ -66,8 +76,8 @@ const Departments = () => {
       description: department.description,
     });
     setIsEditing(true);
-    setShowForm(true);
     setEditId(department._id);
+    setIsModalVisible(true);
   };
 
   const handleDeleteClick = async (id) => {
@@ -81,10 +91,6 @@ const Departments = () => {
         console.error("Error deleting department:", error);
       }
     }
-  };
-
-  const handleEllipsisClick = (index) => {
-    setDropdownVisible(dropdownVisible === index ? null : index);
   };
 
   const handlePageChange = (page) => {
@@ -121,7 +127,7 @@ const Departments = () => {
       }
 
       setNewDepartment({ name: "", color: "", description: "" });
-      setShowForm(false);
+      setIsModalVisible(false);
       setIsEditing(false);
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -133,7 +139,10 @@ const Departments = () => {
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
         <h1 className="text-3xl font-bold mb-2 sm:mb-0">Departments</h1>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setIsEditing(false);
+            setIsModalVisible(true);
+          }}
           className="px-4 py-2 bg-blue-600 text-white rounded"
         >
           New Department +
@@ -165,26 +174,32 @@ const Departments = () => {
               className="relative bg-white p-4 border-t-4 border-gray-300 rounded shadow-md hover:shadow-lg transition-shadow duration-300"
             >
               <div className="absolute top-2 right-2">
-                <button onClick={() => handleEllipsisClick(index)}>
-                  &#x22EE;
-                </button>
-
-                {dropdownVisible === index && (
-                  <div className="absolute right-0 mt-2 w-24 bg-white border border-gray-300 rounded shadow-lg">
-                    <button
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-right"
-                      onClick={() => handleEditClick(department)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="block px-4 py-2 text-sm text-red-700 hover:bg-gray-100 w-full text-right"
-                      onClick={() => handleDeleteClick(department._id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
+                <Dropdown
+                  overlay={
+                    <Menu>
+                      <Menu.Item
+                        onClick={() => handleEditClick(department)}
+                        className="hover:bg-gray-200"
+                      >
+                        Edit
+                      </Menu.Item>
+                      <Menu.Item
+                        onClick={() => handleDeleteClick(department._id)}
+                        className="hover:bg-gray-200"
+                      >
+                        Delete
+                      </Menu.Item>
+                    </Menu>
+                  }
+                  trigger={["click"]}
+                  getPopupContainer={(trigger) => trigger.parentNode}
+                >
+                  <Button
+                    className="text-gray-600 hover:text-blue-500"
+                    type="link"
+                    icon={<EllipsisOutlined />}
+                  />
+                </Dropdown>
               </div>
 
               <h2 className="text-lg font-semibold">{department.name}</h2>
@@ -210,8 +225,8 @@ const Departments = () => {
             key={index}
             onClick={() => handlePageChange(index + 1)}
             className={`px-3 py-2 mx-1 border rounded ${currentPage === index + 1
-                ? "bg-blue-600 text-white"
-                : "border-gray-300 hover:bg-gray-100"
+              ? "bg-blue-600 text-white"
+              : "border-gray-300 hover:bg-gray-100"
               }`}
           >
             {index + 1}
@@ -233,65 +248,47 @@ const Departments = () => {
         {filteredDepartments.length}
       </p>
 
-      {showForm && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
-            <h2 className="text-lg font-bold mb-4">
-              {isEditing ? "Edit Department" : "Add New Department"}
-            </h2>
-            <form onSubmit={handleFormSubmit}>
-              <div className="mb-2">
-                <label className="block mb-1">Name:*</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={newDepartment.name}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full p-2 border border-gray-300 rounded"
-                />
-              </div>
+      <Modal
+        title={isEditing ? "Edit Department" : "Add Department"}
+        visible={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={null} // Remove default buttons
+      >
+        <form onSubmit={handleFormSubmit}>
+          <label htmlFor="name">Name:</label>
+          <Input
+            placeholder="Name"
+            name="name"
+            value={newDepartment.name}
+            onChange={handleInputChange}
+            className="mb-3"
+          />
 
-              <div className="mb-2">
-                <label className="block mb-1">Color:*</label>
-                <input
-                  type="color"
-                  name="color"
-                  value={newDepartment.color}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full p-2 border border-gray-300 rounded"
-                />
-              </div>
+          <label htmlFor="color">Choose Color:</label>
+          <Input
+            type="color"
+            name="color"
+            value={newDepartment.color}
+            onChange={handleInputChange}
+            className="mb-3"
+          />
 
-              <div className="mb-4">
-                <label className="block mb-1">Description:</label>
-                <ReactQuill
-                  value={newDepartment.description}
-                  onChange={handleDescriptionChange}
-                  className="h-32"
-                />
-              </div>
+          <ReactQuill
+            value={newDepartment.description}
+            onChange={handleDescriptionChange}
+            className="mb-3"
+          />
 
-              <div className="flex justify-between">
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                  className="px-4 py-2 bg-gray-300 text-black rounded"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded"
-                >
-                  {isEditing ? "Save Changes" : "Add Department"}
-                </button>
-              </div>
-            </form>
+          <div className="flex justify-end">
+            <Button onClick={() => setIsModalVisible(false)} className="mr-2">
+              Cancel
+            </Button>
+            <Button type="primary" htmlType="submit">
+              {isEditing ? "Update" : "Add"}
+            </Button>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
     </div>
   );
 };

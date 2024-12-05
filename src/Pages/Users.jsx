@@ -175,11 +175,6 @@ const Users = () => {
     }
   };
 
-  const getRoleName = (roleId) => {
-    const role = roles.find((r) => r._id === roleId);
-    return role ? role.name : "Unknown Role";
-  };
-
   const getDepartmentName = (departmentId) => {
     const department = departments.find((p) => p._id === departmentId);
     return department ? department.name : "Unknown Department";
@@ -275,7 +270,7 @@ const Users = () => {
                     />
                   </Dropdown>
                 </div>
-                <div className="text-gray-500">{getRoleName(user.role)}</div>
+                <div className="text-gray-500">{user.role.name}</div>
                 <div className="text-gray-600 flex items-center">
                   <MailOutlined className="mr-1" />
                   {user.email}

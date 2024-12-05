@@ -119,7 +119,7 @@ const AppContent = ({
                 <Route path="/clients" element={<Clients />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/tasks" element={<Tasks />} />
-                <Route path="/calendar" element={<CalendarPage />} />
+                {/* <Route path="/calendar" element={<CalendarPage />} /> */}
                 {/* <Route path="/reports" element={<Reports />} /> */}
 
                 {loggedInUser.role.name === "Admin" ||

@@ -30,18 +30,26 @@ const NotesList = ({ notes }) => {
 };
 
 const Notes = () => {
+    const [projects, setProjects] = useState([]);
+    const [selectedProject, setSelectedProject] = useState(null);
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadingProjects, setLoadingProjects] = useState(false);
 
-    const fetchNotes = async () => {
+    const fetchNotes = async (projectId = null) => {
         const token = localStorage.getItem("authToken");
         setLoading(true);
         try {
-            const response = await axios.get(`${server}/notes/getNotesByClientId`, {
+            const endpoint = projectId
+                ? `${server}/notes/getNotesByProject/${projectId}`
+                : `${server}/notes/getNotesByClientId`;
+
+            const response = await axios.get(endpoint, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
-            })
+            });
+
             setNotes(response.data.notes);
         } catch (error) {
             console.error("Error fetching notes:", error);
@@ -50,13 +58,58 @@ const Notes = () => {
         }
     };
 
+    const fetchProjects = async () => {
+        setLoadingProjects(true);
+        try {
+            const token = localStorage.getItem("authToken");
+            const response = await axios.get(`${server}/projectsByUser`, {
+                headers: { Authorization: `Bearer ${token}` },
+                withCredentials: true,
+            });
+
+            setProjects(Array.isArray(response.data.projects) ? response.data.projects : []);
+        } catch (error) {
+            console.error("Error fetching projects:", error);
+        } finally {
+            setLoadingProjects(false);
+        }
+    };
+
+    const handleProjectChange = (projectId) => {
+        setSelectedProject(projectId);
+        fetchNotes(projectId);
+    };
+
     useEffect(() => {
+        fetchProjects();
         fetchNotes();
     }, []);
 
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
             <h2 className="text-2xl font-bold mb-4">Notes</h2>
+
+            {/* Project Dropdown */}
+            {loadingProjects ? (
+                <p>Loading projects...</p>
+            ) : (
+                <div className="mb-4">
+                    <label className="block mb-2 text-gray-600">Select Project:</label>
+                    <select
+                        className="w-full p-2 border rounded-md"
+                        value={selectedProject || ""}
+                        onChange={(e) => handleProjectChange(e.target.value)}
+                    >
+                        <option value="">All Projects</option>
+                        {projects.map((project) => (
+                            <option key={project._id} value={project._id}>
+                                {project.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
+
             {loading ? (
                 <p>Loading notes...</p>
             ) : (

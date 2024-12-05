@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   MdDashboard,
   MdOutlinePendingActions,
@@ -73,13 +73,13 @@ const linkData = [
       },
     ],
   },
-  {
-    key: "calendar",
-    icon: <MdOutlinePendingActions style={{ color: "#722ed1" }} />,
-    label: "Calendar",
-    to: "/calendar",
-    permission: "Manage Calendar View",
-  },
+  // {
+  //   key: "calendar",
+  //   icon: <MdOutlinePendingActions style={{ color: "#722ed1" }} />,
+  //   label: "Calendar",
+  //   to: "/calendar",
+  //   permission: "Manage Calendar View",
+  // },
   // {
   //   key: "reports",
   //   icon: <MdTaskAlt style={{ color: "#eb2f96" }} />,
@@ -211,11 +211,23 @@ const linkData = [
 ];
 
 const Sidebar = ({ user }) => {
-  const [visible, setVisible] = React.useState(false);
+  const [visible, setVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation(); // Hook to get the current route
+  const location = useLocation();
 
   const toggleSidebar = () => setVisible(!visible);
+
+  // Update `isMobile` based on screen size
+  const handleResize = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+
+  useEffect(() => {
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const filteredLinks = linkData
     .filter((item) => user.role.permissions.includes(item.permission))
@@ -235,8 +247,10 @@ const Sidebar = ({ user }) => {
 
   // Close sidebar on route change
   useEffect(() => {
-    setVisible(false); // Close the sidebar when the route changes
-  }, [location]);
+    if (isMobile) {
+      setVisible(false);
+    }
+  }, [location, isMobile]);
 
   return (
     <>
@@ -262,7 +276,7 @@ const Sidebar = ({ user }) => {
         style={{
           backgroundColor: "#fff",
           borderRight: "1px solid #f0f0f0",
-          display: visible ? "block" : "none", // Hide sidebar on mobile
+          display: visible ? "block" : "none",
         }}
       >
         {/* Logo */}
