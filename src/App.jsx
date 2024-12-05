@@ -54,7 +54,6 @@ import { loadUserRedux } from "./redux/actions/user";
 import { useDispatch } from "react-redux";
 import Notes from "./Pages/Notes/Notes";
 import NoteForm from "./Pages/Notes/NoteForm";
-import NoteHistory from "./Pages/Notes/NoteHistory";
 
 const AppContent = ({
   isAuthenticated,
@@ -77,6 +76,8 @@ const AppContent = ({
           navigate("/tasks");
         } else if (loggedInUser?.role?.name === "Telecaller") {
           navigate("/sales");
+        } else if (loggedInUser?.role?.name == "Client") {
+          navigate("/projects");
         } else {
           navigate("/dashboard");
         }
@@ -131,13 +132,11 @@ const AppContent = ({
                 <Route path="/ticket-history" element={<TicketHistory />} />
 
                 {loggedInUser.role.name === "Admin" ||
-                  loggedInUser.role.name === "Manager" ? (
+                  loggedInUser.role.name === "Manager" || loggedInUser.role.name === "Client" ? (
                   <Route path="/notes" element={<Notes />} />
                 ) : (
                   <Route path="/notes" element={<NoteForm />} />
                 )}
-
-                <Route path="/note-history" element={<NoteHistory />} />
 
                 {loggedInUser.role.name === "Admin" ||
                   loggedInUser.role.name === "Manager" ? (

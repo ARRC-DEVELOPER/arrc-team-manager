@@ -9,9 +9,19 @@ const NotesList = ({ notes }) => {
         <div className="bg-white p-4 shadow-md rounded-md">
             {notes.length > 0 ? (
                 notes.map((note) => (
-                    <div key={note._id} className="p-2 mb-2 border-b">
-                        <h3 className="font-semibold">{note.text}</h3>
-                        <p className="text-sm text-gray-500">Created by: {note.createdBy.name}</p>
+                    <div key={note._id} className="p-2 mb-2 border-b flex items-center justify-between">
+                        <div>
+                            <h3 className="font-semibold">{note.text}</h3>
+                            <p className="text-sm text-gray-500">Created by: {note.createdBy.name}</p>
+                        </div>
+                        <p className="text-sm text-gray-500">{new Intl.DateTimeFormat('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                        }).format(new Date(note.createdAt))}</p>
                     </div>
                 ))
             ) : (
@@ -65,14 +75,12 @@ const AddNote = ({ projectId, fetchNotes }) => {
 };
 
 
-const NotesSection = ({ projectId }) => {
+const NotesSection = () => {
     const [projects, setProjects] = useState([]);
     const [selectedProject, setSelectedProject] = useState(null);
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingProjects, setLoadingProjects] = useState(false);
-
-    console.log(selectedProject);
 
     const fetchProjects = async () => {
         setLoadingProjects(true);
@@ -96,7 +104,7 @@ const NotesSection = ({ projectId }) => {
         const token = localStorage.getItem("authToken");
         setLoading(true);
         try {
-            const response = await axios.get(`${server}/notes/getNotesByClientId/${"674ed722ba3d6c53e7557ce3"}`, {
+            const response = await axios.get(`${server}/notes/getNotesByClientId`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -112,7 +120,7 @@ const NotesSection = ({ projectId }) => {
     useEffect(() => {
         fetchProjects();
         fetchNotes();
-    }, [projectId]);
+    }, []);
 
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
