@@ -31,15 +31,15 @@ ChartJS.register(
 
 const Dashboard = () => {
   const [overallStats, setOverAllStats] = useState();
+  const [taskStats, seTaskStats] = useState([]);
   const [recentActivities, setRecentActivities] = useState();
   const [loading, setLoading] = useState();
   const navigate = useNavigate();
 
-  console.log(recentActivities);
-
   useEffect(() => {
     fetchOverAllStats();
     fetchRecentAcitivities();
+    fetchOverAllUserStats();
   }, []);
 
   const fetchOverAllStats = async () => {
@@ -51,6 +51,18 @@ const Dashboard = () => {
     } catch (error) {
       setLoading(false);
       message.error("Failed to fetch overallstats");
+    }
+  };
+
+  const fetchOverAllUserStats = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${server}/stats/getUserTaskStats`);
+      seTaskStats(response.data);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      message.error("Failed to fetch user Stats");
     }
   };
 
@@ -66,28 +78,64 @@ const Dashboard = () => {
     }
   };
 
+  const labels = taskStats.map((user) => user.name);
+
+  const completedData = taskStats.map((user) => user.completedCount);
+  const ongoingData = taskStats.map((user) => user.ongoingCount);
+  const pendingData = taskStats.map((user) => user.pendingCount);
+
+
   const barData = {
-    labels: ["User A", "User B", "User C", "User D"],
+    labels,
     datasets: [
       {
         label: "Completed",
-        data: [10, 7, 6, 9],
-        backgroundColor: "#4CAF50", // Green for completed
+        data: completedData,
+        backgroundColor: "#4CAF50",
         borderWidth: 1,
       },
       {
         label: "Ongoing",
-        data: [3, 5, 4, 6],
-        backgroundColor: "#03A9F4", // Blue for ongoing
+        data: ongoingData,
+        backgroundColor: "#03A9F4",
         borderWidth: 1,
       },
       {
         label: "Pending",
-        data: [2, 3, 4, 1],
-        backgroundColor: "#FF9800", // Orange for pending
+        data: pendingData,
+        backgroundColor: "#FF9800",
         borderWidth: 1,
       },
     ],
+  };
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      tooltip: {
+        callbacks: {
+          label: (tooltipItem) => `${tooltipItem.raw} tasks`,
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: "Task Count",
+        },
+      },
+      x: {
+        title: {
+          display: true,
+          text: "Users",
+        },
+      },
+    },
   };
 
   const doughnutData = {
@@ -196,25 +244,42 @@ const Dashboard = () => {
       </div>
 
       {/* Charts Section */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Bar Chart */}
-        <div className="bg-white p-4 rounded shadow">
-          <h3 className="text-lg font-bold mb-4">Task Status Overview</h3>
-          <Bar data={barData} />
-        </div>
+      {/* Bar Chart */}
+      <div className="bg-white p-4 mt-6 rounded shadow">
+        <h3 className="text-lg font-bold mb-4">Task Status Overview</h3>
+        <Bar data={barData} options={options} />
+      </div>
 
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Doughnut Chart */}
         <div className="bg-white p-4 rounded shadow">
-          <h3 className="text-lg font-bold mb-4">Task Priority Breakdown</h3>
-          <Doughnut data={doughnutData} />
+          <h3 className="text-lg font-bold mb-4 text-center">Task Priority Breakdown</h3>
+          <div className="w-full h-auto md:w-[400px] md:h-[400px] mx-auto">
+            <Doughnut
+              data={doughnutData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false, // Ensures the chart fits within its container
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Line Chart for User Performance */}
+        <div className="bg-white p-4 rounded shadow">
+          <h3 className="text-lg font-bold mb-4 text-center">User Performance Over Time</h3>
+          <div className="w-full h-auto md:w-[500px] md:h-[400px] mx-auto">
+            <Line
+              data={lineData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false, // Ensures the chart scales dynamically
+              }}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Line Chart for User Performance */}
-      <div className="bg-white mt-5 p-4 w-[95%] rounded shadow">
-        <h3 className="text-lg font-bold mb-4">User Performance Over Time</h3>
-        <Line data={lineData} />
-      </div>
 
       {/* Recent Activities */}
       <div className="mt-6 bg-white p-4 md:p-6 rounded shadow">
