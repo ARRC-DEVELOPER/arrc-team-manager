@@ -116,9 +116,9 @@ const AppContent = ({
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/" element={<Navigate to="/dashboard" />} />
                 <Route path="/departments" element={<Departments />} />
-                <Route path="/clients" element={<Clients />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/tasks" element={<Tasks />} />
+                <Route path="/clients" element={<Clients loggedInUser={loggedInUser} />} />
+                <Route path="/projects" element={<Projects loggedInUser={loggedInUser} />} />
+                <Route path="/tasks" element={<Tasks loggedInUser={loggedInUser} />} />
                 {/* <Route path="/calendar" element={<CalendarPage />} /> */}
                 {/* <Route path="/reports" element={<Reports />} /> */}
 
@@ -300,6 +300,8 @@ const App = () => {
   if (isLoading) {
     return <div>Loading...</div>;
   }
+
+  console.log(loggedInUser);
 
   return (
     <Router>

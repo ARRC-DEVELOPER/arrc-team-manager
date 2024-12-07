@@ -56,29 +56,23 @@ export const updateUser = (formdata, userId) => async (dispatch) => {
   }
 };
 
-export const login = (email, password) => async (dispatch) => {
+export const loginUserRedux = (userData) => async (dispatch) => {
   try {
     dispatch(loginRequest());
-    const { data } = await axios.post(
-      `${server}/user/login`,
-      { email, password },
-      {
-        headers: {
-          "Content-type": "application/json",
-        },
-        withCredentials: true,
-      }
-    );
 
-    dispatch(loginSuccess(data));
+    dispatch(loginSuccess(userData));
   } catch (error) {
-    console.log(error);
-    dispatch(loginFail(error.response.data.message));
+    console.error(error);
+    dispatch(loginFail(error.response?.data?.message || "Login failed"));
   }
 };
 
 export const loadUserRedux = () => async (dispatch) => {
   const token = localStorage.getItem("authToken");
+  if (!token) {
+    dispatch(loadUserFail("Token not found. Please login again."));
+    return;
+  }
 
   try {
     dispatch(loadUserRequest());

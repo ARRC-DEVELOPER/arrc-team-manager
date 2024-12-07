@@ -74,6 +74,27 @@ const AddNote = ({ projectId, fetchNotes }) => {
     );
 };
 
+const PaginationControls = ({ totalPages, currentPage, onPageChange }) => {
+    return (
+        <div className="flex justify-center mt-4">
+            <button
+                className="px-4 py-2 border rounded-l-md"
+                onClick={() => onPageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+            >
+                Previous
+            </button>
+            <span className="px-4 py-2 border">{`Page ${currentPage} of ${totalPages}`}</span>
+            <button
+                className="px-4 py-2 border rounded-r-md"
+                onClick={() => onPageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+            >
+                Next
+            </button>
+        </div>
+    );
+};
 
 const NotesSection = () => {
     const [projects, setProjects] = useState([]);
@@ -81,14 +102,15 @@ const NotesSection = () => {
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingProjects, setLoadingProjects] = useState(false);
+    const [pagination, setPagination] = useState({ totalPages: 1, currentPage: 1 });
 
-    const fetchNotes = async (projectId = null) => {
+    const fetchNotes = async (projectId = null, page = 1) => {
         const token = localStorage.getItem("authToken");
         setLoading(true);
         try {
             const endpoint = projectId
-                ? `${server}/notes/getNotesByProject/${projectId}`
-                : `${server}/notes/getNotesByClientId`;
+                ? `${server}/notes/getNotesByProject/${projectId}?page=${page}&limit=5`
+                : `${server}/notes/getNotesByClientId?page=${page}&limit=5`;
 
             const response = await axios.get(endpoint, {
                 headers: {
@@ -96,14 +118,16 @@ const NotesSection = () => {
                 },
             });
 
-            setNotes(response.data.notes);
+            const { notes, totalPages, currentPage } = response.data;
+
+            setNotes(notes);
+            setPagination({ totalPages, currentPage });
         } catch (error) {
             console.error("Error fetching notes:", error);
         } finally {
             setLoading(false);
         }
     };
-
 
     const fetchProjects = async () => {
         setLoadingProjects(true);
@@ -165,7 +189,14 @@ const NotesSection = () => {
             {loading ? (
                 <p>Loading notes...</p>
             ) : (
-                <NotesList notes={notes} />
+                <>
+                    <NotesList notes={notes} />
+                    <PaginationControls
+                        totalPages={pagination.totalPages}
+                        currentPage={pagination.currentPage}
+                        onPageChange={(page) => fetchNotes(selectedProject, page)}
+                    />
+                </>
             )}
         </div>
     );

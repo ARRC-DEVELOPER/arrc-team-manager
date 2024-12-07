@@ -18,9 +18,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../Components/css/Shimmer.css";
 import { server } from "../main";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-
 const Shimmer = () => {
   return (
     <div className="shimmer-container">
@@ -31,7 +28,7 @@ const Shimmer = () => {
   );
 };
 
-const Clients = () => {
+const Clients = ({ loggedInUser }) => {
   const [visible, setVisible] = useState(false);
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
@@ -39,7 +36,6 @@ const Clients = () => {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
   const [form] = Form.useForm();
-  const navigate = useNavigate();
 
   const [dropdownIndex, setDropdownIndex] = useState(null);
 
@@ -176,17 +172,13 @@ const Clients = () => {
     return user.role.name == "Client";
   });
 
-  const { user: loggedUser } = useSelector(
-    state => state.user
-  );
-
   return (
     <div className="p-5">
       <ToastContainer />
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Clients</h1>
         {
-          loggedUser.role.name == "Admin" || loggedUser.role.name == "Manager" ? (
+          loggedInUser?.role?.name == "Admin" || loggedInUser?.role?.name == "Manager" ? (
             <button
               onClick={() => showModal()}
               className="px-4 py-2 bg-blue-600 text-white rounded transition hover:bg-blue-700"
@@ -209,7 +201,7 @@ const Clients = () => {
               className="bg-white p-4 border rounded shadow-md hover:shadow-lg transition relative"
             >
               <h2 className="font-semibold">{client.name}</h2>
-              <p>Department: {client.department.name}</p>
+              <p>Department: {client.department?.name}</p>
               <p>Email: {client.email}</p>
               <p>
                 Website:{" "}
@@ -231,7 +223,7 @@ const Clients = () => {
               )}
 
               {
-                loggedUser.role.name == "Admin" || loggedUser.role.name == "Manager" ? (
+                loggedInUser?.role?.name == "Admin" || loggedInUser?.role?.name == "Manager" ? (
                   <button
                     className="absolute top-2 right-2 text-gray-600 focus:outline-none"
                     onClick={() => handleDropdownToggle(index)}

@@ -40,6 +40,7 @@ const Navbar = ({ user, onLogout }) => {
   }, []);
 
   const handleLogout = () => {
+    console.log("Loged out...");
     localStorage.removeItem("authToken");
     onLogout();
     message.success("Logout successful!");
