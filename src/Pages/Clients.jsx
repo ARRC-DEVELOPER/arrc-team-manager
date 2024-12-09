@@ -101,7 +101,6 @@ const Clients = ({ loggedInUser }) => {
     }
   };
 
-
   const handleOk = async (values) => {
     const formData = new FormData();
     formData.append("name", values.name);
@@ -175,6 +174,7 @@ const Clients = ({ loggedInUser }) => {
   return (
     <div className="p-5">
       <ToastContainer />
+
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Clients</h1>
         {
@@ -193,7 +193,7 @@ const Clients = ({ loggedInUser }) => {
 
       <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {loading ? (
-          <Shimmer /> // Show shimmer effect while loading
+          <Shimmer />
         ) : (
           filteredUsers.map((client, index) => (
             <div
@@ -314,7 +314,6 @@ const Clients = ({ loggedInUser }) => {
               ))}
             </Select>
           </Form.Item>
-
 
           <Form.Item label="Profile Picture">
             <input type="file" onChange={handleInputChange} />

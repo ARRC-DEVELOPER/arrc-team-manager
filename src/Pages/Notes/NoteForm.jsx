@@ -104,6 +104,8 @@ const NotesSection = () => {
     const [loadingProjects, setLoadingProjects] = useState(false);
     const [pagination, setPagination] = useState({ totalPages: 1, currentPage: 1 });
 
+    console.log(notes);
+
     const fetchNotes = async (projectId = null, page = 1) => {
         const token = localStorage.getItem("authToken");
         setLoading(true);

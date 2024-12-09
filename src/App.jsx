@@ -73,7 +73,7 @@ const AppContent = ({
         if (lastPath && lastPath !== "/login" && lastPath !== "/") {
           navigate(lastPath);
         } else if (loggedInUser?.role?.name === "User") {
-          navigate("/tasks");
+          navigate("/tasks-data");
         } else if (loggedInUser?.role?.name === "Telecaller") {
           navigate("/sales");
         } else if (loggedInUser?.role?.name == "Client") {
@@ -164,7 +164,7 @@ const AppContent = ({
                 {/* <Route path="/events" element={<Events />} /> */}
                 <Route path="/team" element={<Team />} />
                 <Route path="/trashed" element={<Trash />} />
-                <Route path="/tasks-data" element={<Tasks />} />
+                <Route path="/tasks-data" element={<Tasks loggedInUser={loggedInUser} />} />
                 <Route path="/tasks/status" element={<Status />} />
                 <Route path="/tags" element={<Tags />} />
                 <Route path="/activity-types" element={<ActivityTypes />} />

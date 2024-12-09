@@ -46,6 +46,7 @@ const Projects = ({ loggedInUser }) => {
   const [pageSize] = useState(6);
   const navigate = useNavigate();
 
+  console.log(clients);
 
   useEffect(() => {
     fetchProjects();

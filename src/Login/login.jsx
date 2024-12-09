@@ -12,29 +12,28 @@ const Login = ({ onLogin }) => {
   const handleLogin = async (values) => {
     setLoading(true);
     try {
-      const response = await axios.post(`${server}/auth/login`, values);
+      const response = await axios.post(`${server}/auth/login`, values, {
+        headers: { "Content-Type": "application/json" },
+      });
+      console.log(response);
       const { token, user } = response.data;
-  
+
       localStorage.setItem("authToken", token);
-  
+
       const roleResponse = await axios.get(`${server}/roles/${user.role}`);
       const userWithRole = { ...user, role: roleResponse.data };
-  
+
+      console.log(userWithRole);
+
       onLogin(userWithRole);
-  
+
       message.success("Login successful!");
-  
-      // Determine the redirect path
-      const redirectTo =
-        location.state?.from?.pathname && location.state.from.pathname !== "/login"
-          ? location.state.from.pathname
-          : "/dashboard";
-  
-      // Navigate to the determined path and clear location state
-      navigate(redirectTo, { replace: true, state: {} });
+      setLoading(false);
+      // navigate("/dashboard");
+      const redirectTo = location.state?.from?.pathname || "/dashboard";
+      navigate(redirectTo, { replace: true });
     } catch (error) {
       message.error("Login failed. Please check your credentials.");
-    } finally {
       setLoading(false);
     }
   };

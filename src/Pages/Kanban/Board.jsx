@@ -10,13 +10,12 @@ import { server } from "../../main";
 import AddTask from "./AddTask";
 import { useSelector } from "react-redux";
 
-const Board = () => {
+const Board = ({ loggedInUser }) => {
   const [cards, setCards] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
 
   const handleEditTask = (task) => {
-    console.log("Editing task: ", task);
     setEditingTask(task);
   };
 
@@ -28,9 +27,6 @@ const Board = () => {
       console.error("Error deleting card", error);
     }
   };
-
-  console.log("Tasks Data: ", cards);
-  console.log("Status Data: ", statuses);
 
   const fetchTasks = async () => {
     const token = localStorage.getItem("authToken");
@@ -72,7 +68,7 @@ const Board = () => {
   return (
     <>
       {
-        user.role.name == "Admin" || user.role.name == "Manager" ? (
+        loggedInUser?.role?.name == "Admin" || loggedInUser?.role?.name == "Manager" ? (
           <AddTask
             setCards={setCards}
             editingTask={editingTask}
