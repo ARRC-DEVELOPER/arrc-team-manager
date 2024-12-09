@@ -35,6 +35,7 @@ const Clients = ({ loggedInUser }) => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
+  const [clients, setClients] = useState([]);
   const [form] = Form.useForm();
 
   const [dropdownIndex, setDropdownIndex] = useState(null);
@@ -44,6 +45,7 @@ const Clients = ({ loggedInUser }) => {
   };
 
   useEffect(() => {
+    fetchClients();
     fetchUsers();
     fetchDepartments();
   }, []);
@@ -63,6 +65,24 @@ const Clients = ({ loggedInUser }) => {
     } catch (error) {
       setLoading(false);
       message.error("Failed to fetch users");
+    }
+  };
+
+  const fetchClients = async () => {
+    const token = localStorage.getItem("authToken");
+    setLoading(true);
+    try {
+      const response = await axios.get(`${server}/users/getAssignedClients`, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
+
+      setClients(response.data);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching clients:", error);
+      message.error("Failed to fetch clients");
     }
   };
 
@@ -127,7 +147,7 @@ const Clients = ({ loggedInUser }) => {
       message.success(
         editingUser ? "User updated successfully" : "User created successfully"
       );
-      fetchUsers();
+      fetchClients();
       handleCancel();
     } catch (error) {
       message.error(
@@ -195,7 +215,7 @@ const Clients = ({ loggedInUser }) => {
         {loading ? (
           <Shimmer />
         ) : (
-          filteredUsers.map((client, index) => (
+          clients.map((client, index) => (
             <div
               key={index}
               className="bg-white p-4 border rounded shadow-md hover:shadow-lg transition relative"
@@ -257,7 +277,7 @@ const Clients = ({ loggedInUser }) => {
       </div>
 
       <Modal
-        title={editingUser ? "Edit User" : "New User"}
+        title={editingUser ? "Edit Client" : "New Client"}
         visible={visible}
         onOk={() => form.validateFields().then(handleOk).catch(console.log)}
         onCancel={handleCancel}
