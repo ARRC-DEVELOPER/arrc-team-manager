@@ -19,9 +19,7 @@ const SimpleTabs = () => {
         const usersResponse = await axios.get(`${server}/users`);
         setUsers(usersResponse.data); // Set all users
 
-        // Fetch client data from API
-        const clientResponse = await axios.get('https://task-manager-backend-btas.onrender.com/api/clients');
-        setClient(clientResponse.data[0]);
+        setClient(usersResponse.data[4]);
       } catch (error) {
         console.error("Error fetching data:", error);
       }

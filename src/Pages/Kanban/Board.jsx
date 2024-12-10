@@ -97,6 +97,7 @@ const Board = ({ loggedInUser }) => {
             }
             cards={cards}
             setCards={setCards}
+            loggedInUser={loggedInUser}
             handleEditTask={handleEditTask}
             handleDeleteTask={handleDeleteTask}
           />

@@ -41,13 +41,22 @@ const Users = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${server}/users`);
-      setUsers(
-        response.data.map((user) => ({
+      const usersResponse = await axios.get(`${server}/users`);
+      const statsResponse = await axios.get(`${server}/stats/getUserTaskStats`);
+
+      const usersWithStats = usersResponse.data.map((user) => {
+        const userStats = statsResponse.data.find(
+          (stat) => stat.userId === user._id
+        );
+
+        return {
           ...user,
           password: undefined,
-        }))
-      );
+          ongoingTaskCount: userStats?.ongoingCount + userStats?.pendingCount || 0,
+        };
+      });
+
+      setUsers(usersWithStats);
     } catch (error) {
       message.error("Failed to fetch users");
     }
@@ -175,11 +184,6 @@ const Users = () => {
     }
   };
 
-  const getDepartmentName = (departmentId) => {
-    const department = departments.find((p) => p._id === departmentId);
-    return department ? department.name : "Unknown Department";
-  };
-
   return (
     <div className="p-4">
       <h1 className="page__heading">Users</h1>
@@ -261,7 +265,7 @@ const Users = () => {
                       </Menu>
                     }
                     trigger={["click"]}
-                    getPopupContainer={(trigger) => trigger.parentNode} // To avoid dropdown clipping issues
+                    getPopupContainer={(trigger) => trigger.parentNode}
                   >
                     <Button
                       className="text-gray-600 hover:text-blue-500"
@@ -283,16 +287,24 @@ const Users = () => {
             </div>
             <div className="flex p-4 border-t">
               <div className="mr-3">
-                <span className="bg-blue-500 text-white px-2 py-1 rounded">
-                  {getDepartmentName(user.department)}
-                </span>
+                {
+                  user.department && (
+                    <span className="bg-blue-500 text-white px-2 py-1 rounded">
+                      {user.department.name}
+                    </span>
+                  )
+                }
               </div>
-              <div>
-                <span className="bg-gray-800 text-white px-2 py-1 rounded">
-                  {user.ongoingTaskCount || 0}
-                </span>{" "}
-                Tasks Active
-              </div>
+              {
+                (user.role.name == "User" || user.role.name == "Telecaller") && (
+                  <div>
+                    <span className="bg-gray-800 text-white px-2 py-1 rounded">
+                      {user.ongoingTaskCount || 0}
+                    </span>
+                    Tasks Active
+                  </div>
+                )
+              }
             </div>
           </div>
         ))}

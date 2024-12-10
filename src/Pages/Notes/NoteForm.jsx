@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { server } from "../../main";
+import { message } from "antd";
 
 const NotesList = ({ notes }) => {
     return (
@@ -12,6 +13,16 @@ const NotesList = ({ notes }) => {
                     <div key={note._id} className="p-2 mb-2 border-b flex items-center justify-between">
                         <div>
                             <h3 className="font-semibold">{note.text}</h3>
+                            {note.file && (
+                                <a
+                                    href={`${note.file}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 underline"
+                                >
+                                    View File
+                                </a>
+                            )}
                             <p className="text-sm text-gray-500">Created by: {note.createdBy.name}</p>
                         </div>
                         <p className="text-sm text-gray-500">{new Intl.DateTimeFormat('en-US', {
@@ -31,24 +42,41 @@ const NotesList = ({ notes }) => {
     );
 };
 
+
 const AddNote = ({ projectId, fetchNotes }) => {
     const [noteText, setNoteText] = useState("");
+    const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    const fileInputRef = React.useRef();
+
     const handleAddNote = async () => {
+        const token = localStorage.getItem("authToken");
+
         if (!noteText.trim()) return alert("Note text cannot be empty");
         setLoading(true);
 
         try {
-            const token = localStorage.getItem("authToken");
-            await axios.post(`${server}/notes/addNote/${projectId}`, { text: noteText }, {
-                headers: { Authorization: `Bearer ${token}` },
+            const formData = new FormData();
+            formData.append("text", noteText);
+            if (file) formData.append("file", file);
+
+            await axios.post(`${server}/notes/addNote/${projectId}`, formData, {
+                headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
                 withCredentials: true,
             });
+
+            message.success("Note added successfully");
+
             setNoteText("");
+            setFile(null);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
             fetchNotes();
         } catch (error) {
             console.error("Error adding note:", error);
+            message.error(`${error.message}`);
         } finally {
             setLoading(false);
         }
@@ -63,6 +91,14 @@ const AddNote = ({ projectId, fetchNotes }) => {
                 onChange={(e) => setNoteText(e.target.value)}
                 rows={3}
             ></textarea>
+
+            <input
+                type="file"
+                className="block mt-2"
+                ref={fileInputRef}
+                onChange={(e) => setFile(e.target.files[0])}
+            />
+
             <button
                 className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                 onClick={handleAddNote}
@@ -73,6 +109,7 @@ const AddNote = ({ projectId, fetchNotes }) => {
         </div>
     );
 };
+
 
 const PaginationControls = ({ totalPages, currentPage, onPageChange }) => {
     return (
@@ -103,8 +140,6 @@ const NotesSection = () => {
     const [loading, setLoading] = useState(false);
     const [loadingProjects, setLoadingProjects] = useState(false);
     const [pagination, setPagination] = useState({ totalPages: 1, currentPage: 1 });
-
-    console.log(notes);
 
     const fetchNotes = async (projectId = null, page = 1) => {
         const token = localStorage.getItem("authToken");

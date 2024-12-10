@@ -127,27 +127,25 @@ function TicketList() {
             {activeTickets.map((ticket) => (
               <tr
                 key={ticket._id}
-                className={`border-b border-gray-200 hover:bg-gray-100 transition duration-200 ${
-                  ticket.status === "In Progress"
+                className={`border-b border-gray-200 hover:bg-gray-100 transition duration-200 ${ticket.status === "In Progress"
                     ? "bg-yellow-100"
                     : ticket.status === "Resolved"
-                    ? "bg-red-100"
-                    : "bg-white"
-                }`}
+                      ? "bg-red-100"
+                      : "bg-white"
+                  }`}
               >
                 <td className="py-3 px-6 text-left font-medium">
                   {ticket.title}
                 </td>
-                <td className="py-3 px-6 text-left">{ticket.createdBy.name}</td>
+                <td className="py-3 px-6 text-left">{ticket?.createdBy?.name}</td>
                 <td className="py-3 px-6 text-center">
                   <span
-                    className={`text-xs font-semibold inline-block py-1 px-3 rounded-full text-white ${
-                      ticket.status === "Open"
+                    className={`text-xs font-semibold inline-block py-1 px-3 rounded-full text-white ${ticket.status === "Open"
                         ? "bg-blue-500"
                         : ticket.status === "In Progress"
-                        ? "bg-yellow-500"
-                        : "bg-green-500"
-                    }`}
+                          ? "bg-yellow-500"
+                          : "bg-green-500"
+                      }`}
                   >
                     {ticket.status}
                   </span>

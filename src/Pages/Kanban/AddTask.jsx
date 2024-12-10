@@ -118,8 +118,8 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
       console.log(selectedUserId);
       setTaskData((prevData) => {
         const assignedTo = prevData.assignedTo.includes(selectedUserId)
-          ? prevData.assignedTo.filter((id) => id !== selectedUserId) // Remove if already selected
-          : [...prevData.assignedTo, selectedUserId]; // Add if not selected
+          ? prevData.assignedTo.filter((id) => id !== selectedUserId)
+          : [...prevData.assignedTo, selectedUserId];
         return { ...prevData, assignedTo };
       });
 
@@ -282,7 +282,11 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
         console.log(response.data.savedTask);
 
         // Re-fetch tasks after updating
-        const updatedTasks = await axios.get(`${server}/tasks`);
+        const token = localStorage.getItem("authToken");
+        const updatedTasks = await axios.get(`${server}/tasks`, {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        });
         setCards(updatedTasks.data);
 
         setIsModalVisibleNew(false);
@@ -354,9 +358,8 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
                 Title*
               </label>
               <FaMicrophone
-                className={`cursor-pointer text-lg ${
-                  isListening ? "text-red-500" : "text-gray-500"
-                }`}
+                className={`cursor-pointer text-lg ${isListening ? "text-red-500" : "text-gray-500"
+                  }`}
                 onClick={handleMicClick}
                 title="Voice Input"
               />
@@ -540,9 +543,8 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
                 Description
               </label>
               <FaMicrophone
-                className={`cursor-pointer text-lg ${
-                  isListeningDescription ? "text-red-500" : "text-gray-500"
-                }`}
+                className={`cursor-pointer text-lg ${isListeningDescription ? "text-red-500" : "text-gray-500"
+                  }`}
                 onClick={handleDescriptionMicClick}
                 title="Voice Input"
               />

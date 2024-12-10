@@ -10,6 +10,16 @@ const NotesList = ({ notes }) => {
                     <div key={note._id} className="p-2 mb-2 border-b flex items-center justify-between">
                         <div>
                             <h3 className="font-semibold">{note.text}</h3>
+                            {note.file && (
+                                <a
+                                    href={`${note.file}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 underline"
+                                >
+                                    View File
+                                </a>
+                            )}
                             <p className="text-sm text-gray-500">Created by: {note.createdBy.name}</p>
                         </div>
                         <p className="text-sm text-gray-500">{new Intl.DateTimeFormat('en-US', {

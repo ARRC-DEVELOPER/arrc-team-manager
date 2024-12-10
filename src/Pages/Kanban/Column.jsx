@@ -15,6 +15,7 @@ const Column = ({
   setCards,
   handleEditTask,
   handleDeleteTask,
+  loggedInUser,
 }) => {
   const [active, setActive] = useState(false);
 
@@ -65,7 +66,12 @@ const Column = ({
 
         console.log("Card updated: ", updatedCard);
 
-        const response = await axios.get(`${server}/tasks`);
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get(`${server}/tasks`, {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        });
+        
         setCards(response.data);
       } catch (err) {
         console.error("Error updating card:", err);
@@ -145,9 +151,8 @@ const Column = ({
         onDrop={handleDragEnd}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`h-full w-full transition-colors ${
-          active ? "bg-gray-100" : "bg-gray-50"
-        }`}
+        className={`h-full w-full transition-colors ${active ? "bg-gray-100" : "bg-gray-50"
+          }`}
       >
         {filteredCards.map((c) => {
           return (
@@ -157,6 +162,7 @@ const Column = ({
               handleDragStart={handleDragStart}
               handleEditTask={handleEditTask}
               handleDeleteTask={handleDeleteTask}
+              loggedInUser={loggedInUser}
             />
           );
         })}

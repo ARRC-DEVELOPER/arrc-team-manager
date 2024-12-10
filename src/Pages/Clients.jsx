@@ -215,64 +215,68 @@ const Clients = ({ loggedInUser }) => {
         {loading ? (
           <Shimmer />
         ) : (
-          clients.map((client, index) => (
-            <div
-              key={index}
-              className="bg-white p-4 border rounded shadow-md hover:shadow-lg transition relative"
-            >
-              <h2 className="font-semibold">{client.name}</h2>
-              <p>Department: {client.department?.name}</p>
-              <p>Email: {client.email}</p>
-              <p>
-                Website:{" "}
-                <a
-                  href={client.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline"
-                >
-                  {client.website}
-                </a>
-              </p>
-              {client.profileImage && (
-                <img
-                  src={client.profileImage}
-                  alt={`${client.name}'s profile`}
-                  className="mt-2 rounded-full w-20 h-20 object-cover"
-                />
-              )}
+          clients.length > 0 ? (
+            clients.map((client, index) => (
+              <div
+                key={index}
+                className="bg-white p-4 border rounded shadow-md hover:shadow-lg transition relative"
+              >
+                <h2 className="font-semibold">{client.name}</h2>
+                <p>Department: {client?.department?.name}</p>
+                <p>Email: {client.email}</p>
+                <p>
+                  Website:{" "}
+                  <a
+                    href={client.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    {client.website}
+                  </a>
+                </p>
+                {client.profileImage && (
+                  <img
+                    src={client.profileImage}
+                    alt={`${client.name}'s profile`}
+                    className="mt-2 rounded-full w-20 h-20 object-cover"
+                  />
+                )}
 
-              {
-                loggedInUser?.role?.name == "Admin" || loggedInUser?.role?.name == "Manager" ? (
-                  <button
-                    className="absolute top-2 right-2 text-gray-600 focus:outline-none"
-                    onClick={() => handleDropdownToggle(index)}
-                  >
-                    ⋮
-                  </button>
-                ) : (
-                  <></>
-                )
-              }
+                {
+                  loggedInUser?.role?.name == "Admin" || loggedInUser?.role?.name == "Manager" ? (
+                    <button
+                      className="absolute top-2 right-2 text-gray-600 focus:outline-none"
+                      onClick={() => handleDropdownToggle(index)}
+                    >
+                      ⋮
+                    </button>
+                  ) : (
+                    <></>
+                  )
+                }
 
-              {dropdownIndex === index && (
-                <div className="absolute top-10 right-2 bg-white border rounded shadow-md z-10">
-                  <button
-                    onClick={() => showModal(client)}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleArchiveUser(client._id)}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Delete
-                  </button>
-                </div>
-              )}
-            </div>
-          ))
+                {dropdownIndex === index && (
+                  <div className="absolute top-10 right-2 bg-white border rounded shadow-md z-10">
+                    <button
+                      onClick={() => showModal(client)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleArchiveUser(client._id)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <p>No clients available.</p>
+          )
         )}
       </div>
 

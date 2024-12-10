@@ -141,7 +141,7 @@ function Leaves() {
                     : "bg-white"
                 }`}
               >
-                <td className="py-3 px-6 text-left">{leave.employeeId.name}</td>
+                <td className="py-3 px-6 text-left">{leave?.employeeId?.name}</td>
                 <td className="py-3 px-6 text-left">
                   {new Date(leave.startDate).toLocaleDateString()} -{" "}
                   {new Date(leave.endDate).toLocaleDateString()}
