@@ -80,6 +80,8 @@ const Dashboard = () => {
 
   const labels = taskStats.map((user) => user.name);
 
+  // console.log(taskStats);
+
   const completedData = taskStats.map((user) => user.completedCount);
   const ongoingData = taskStats.map((user) => user.ongoingCount);
   const pendingData = taskStats.map((user) => user.pendingCount);
@@ -107,35 +109,6 @@ const Dashboard = () => {
         borderWidth: 1,
       },
     ],
-  };
-
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top",
-      },
-      tooltip: {
-        callbacks: {
-          label: (tooltipItem) => `${tooltipItem.raw} tasks`,
-        },
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: "Task Count",
-        },
-      },
-      x: {
-        title: {
-          display: true,
-          text: "Users",
-        },
-      },
-    },
   };
 
   const doughnutData = {
@@ -220,25 +193,25 @@ const Dashboard = () => {
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-bold">Total Tasks</h2>
           <p className="text-4xl font-semibold mt-2">
-            {overallStats.totalTasks}
+            {overallStats.totalTasks || "0"}
           </p>
         </div>
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-bold">Completed Tasks</h2>
           <p className="text-4xl font-semibold mt-2">
-            {overallStats.completedTasks}
+            {overallStats.completedTasks || "0"}
           </p>
         </div>
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-bold">Pending Tasks</h2>
           <p className="text-4xl font-semibold mt-2">
-            {overallStats.pendingTasks}
+            {overallStats.pendingTasks || "0"}
           </p>
         </div>
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-bold">Overdue Tasks</h2>
           <p className="text-4xl font-semibold mt-2">
-            {overallStats.overdueTasks}
+            {overallStats.overdueTasks || "0"}
           </p>
         </div>
       </div>
@@ -247,7 +220,10 @@ const Dashboard = () => {
       {/* Bar Chart */}
       <div className="bg-white p-4 mt-6 rounded shadow">
         <h3 className="text-lg font-bold mb-4">Task Status Overview</h3>
-        <Bar data={barData} options={options} />
+        <Bar data={barData} options={{
+          responsive: true,
+          maintainAspectRatio: false,
+        }} />
       </div>
 
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -259,7 +235,7 @@ const Dashboard = () => {
               data={doughnutData}
               options={{
                 responsive: true,
-                maintainAspectRatio: false, // Ensures the chart fits within its container
+                maintainAspectRatio: false,
               }}
             />
           </div>
@@ -273,7 +249,7 @@ const Dashboard = () => {
               data={lineData}
               options={{
                 responsive: true,
-                maintainAspectRatio: false, // Ensures the chart scales dynamically
+                maintainAspectRatio: false,
               }}
             />
           </div>

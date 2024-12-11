@@ -6,9 +6,9 @@ import { Progress, message } from "antd";
 import { server } from "../main";
 
 const UserDetails = () => {
-  const [user, setUser] = useState();
-  const [performance, setPerformance] = useState();
-  const [tasks, setTasks] = useState();
+  const [user, setUser] = useState("");
+  const [performance, setPerformance] = useState("");
+  const [tasks, setTasks] = useState("");
   const [loading, setLoading] = useState(true);
   const [animatedTaskCompletion, setAnimatedTaskCompletion] = useState(0);
   const [animatedTimeEfficiency, setAnimatedTimeEfficiency] = useState(0);
@@ -21,6 +21,10 @@ const UserDetails = () => {
     fetchUserPerformance();
     fetchUserTasks();
   }, []);
+
+  console.log(user);
+  console.log(performance);
+  console.log(tasks);
 
   const fetchUser = async () => {
     setLoading(true);
@@ -65,9 +69,9 @@ const UserDetails = () => {
 
   // Filter tasks
   const completedTasks =
-    (tasks && tasks.filter((task) => task.statusId.name === "Complete")) || 0;
+    (tasks && tasks.filter((task) => task?.statusId?.name === "Complete")) || 0;
   const pendingTasksList =
-    (tasks && tasks.filter((task) => task.statusId.name !== "Complete")) || 0;
+    (tasks && tasks.filter((task) => task?.statusId?.name !== "Complete")) || 0;
 
   const animateProgress = (data) => {
     if (!data) return;
@@ -83,12 +87,12 @@ const UserDetails = () => {
       }, 20);
     };
 
-    animate(setAnimatedTaskCompletion, data.taskCompletionPercentage);
-    animate(setAnimatedTimeEfficiency, data.timeEfficiencyPercentage);
-    animate(setAnimatedOverallPerformance, data.overallPerformancePercentage);
+    animate(setAnimatedTaskCompletion, data?.taskCompletionPercentage);
+    animate(setAnimatedTimeEfficiency, data?.timeEfficiencyPercentage);
+    animate(setAnimatedOverallPerformance, data?.overallPerformancePercentage);
   };
 
-  if ((loading, !user, !performance, !tasks)) {
+  if ((loading, !user)) {
     return <div>Loading...</div>;
   }
 

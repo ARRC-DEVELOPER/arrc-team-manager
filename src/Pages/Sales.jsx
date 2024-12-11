@@ -1,3 +1,5 @@
+// ADMIN
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Modal, Button } from "antd";
@@ -12,7 +14,7 @@ const Sales = () => {
   const [users, setUsers] = useState([]);
   const [isUpdateMode, setIsUpdateMode] = useState(false);
   const [selectedLead, setSelectedLead] = useState("");
-  const [selectedUsers, setSelectedUsers] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState([]);
   const [isModalVisibleNew, setIsModalVisibleNew] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState("");
@@ -112,8 +114,15 @@ const Sales = () => {
     setIsFollowUpModalOpen(false);
   };
 
+  const handleInputChange = (e) => {
+    const { value } = e.target;
+    setSelectedUsers((prevData) =>
+      prevData.includes(value) ? prevData.filter((id) => id !== value) : [...prevData, value]
+    );
+  };
+
   const filteredUsers = users.filter(
-    (user) => user.role === "670546c00e9ed04781616eb6"
+    (user) => user.role.name === "Telecaller"
   );
 
   const assignedLeads = leads.filter((lead) => lead.assignedTo.length !== 0);
@@ -242,14 +251,20 @@ const Sales = () => {
             </select>
           </div>
 
-          {/* Select Users */}
           <div>
-            <label className="block mb-2 font-semibold text-gray-700">Select Users</label>
+            <label
+              className="block mb-2 font-semibold text-gray-700"
+              htmlFor="assignedTo"
+            >
+              Select User*
+            </label>
             <select
+              name="assignedTo"
               value={selectedUsers}
-              onChange={(e) => setSelectedUsers(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none"
+              onChange={handleInputChange}
+              className="form-select border border-gray-300 rounded-md p-3 w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               multiple
+              required
             >
               {filteredUsers.map((user) => (
                 <option key={user._id} value={user._id}>
@@ -257,6 +272,21 @@ const Sales = () => {
                 </option>
               ))}
             </select>
+
+            {/* Display selected users */}
+            <div className="mt-4">
+              <h4 className="font-semibold text-gray-600">Selected Users:</h4>
+              <ul>
+                {selectedUsers.length > 0 ? (
+                  selectedUsers.map((userId) => {
+                    const user = users.find((user) => user._id === userId);
+                    return <li key={userId}>{user?.name}</li>;
+                  })
+                ) : (
+                  <li>No users selected</li>
+                )}
+              </ul>
+            </div>
           </div>
 
           <div className="flex justify-between mt-4">
