@@ -9,6 +9,7 @@ import {
   Dropdown,
   Switch,
   message,
+  Pagination
 } from "antd";
 import axios from "axios";
 import { server } from "../main";
@@ -32,6 +33,9 @@ const Users = () => {
   const [file, setFile] = useState(null);
   const [form] = Form.useForm();
   const navigate = useNavigate();
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
 
   useEffect(() => {
     fetchUsers();
@@ -170,10 +174,20 @@ const Users = () => {
     setFilter(value);
   };
 
+  const handlePaginationChange = (page, size) => {
+    setCurrentPage(page);
+    setPageSize(size);
+  };
+
   const filteredUsers = users.filter((user) => {
     if (filter === "all") return true;
     return filter === "1" ? user.isActive : !user.isActive;
   });
+
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const handleInputChange = (e) => {
     const { files } = e.target;
@@ -203,7 +217,7 @@ const Users = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredUsers.map((user) => (
+        {paginatedUsers.map((user) => (
           <div
             className="bg-white shadow-md rounded-lg overflow-hidden user-card-view hover:shadow-lg transition-shadow duration-300 ease-in-out"
             key={user._id}
@@ -309,6 +323,16 @@ const Users = () => {
           </div>
         ))}
       </div>
+
+      <Pagination
+        current={currentPage}
+        pageSize={pageSize}
+        total={filteredUsers.length}
+        onChange={handlePaginationChange}
+        showSizeChanger
+        pageSizeOptions={['6', '12', '24']}
+        className="w-[20%] mt-4 m-auto"
+      />
 
       <Modal
         title={editingUser ? "Edit User" : "New User"}

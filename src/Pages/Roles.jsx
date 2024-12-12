@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { server } from "../main";
 
+import { Dropdown, Menu, Button } from "antd";
+import { EllipsisOutlined } from "@ant-design/icons";
+
 const permissionsList = [
   "Manage Calendar View",
   "Manage Status",
@@ -10,17 +13,14 @@ const permissionsList = [
   "Manage Tasks",
   "Manage Entry",
   "Manage Users",
-  "Manage Tags",
   "Manage Activities",
   "Manage Reports",
   "Manage Roles",
-  "Manage Taxes",
   "Manage Invoices",
   "Manage Settings",
   "Manage Department",
-  "Manage Expenses",
-  "Manage Activity Log",
   "Manage Events",
+  "Manage Notes",
   "Archived Users",
 ];
 
@@ -137,29 +137,32 @@ const Roles = () => {
             <div className="flex justify-between items-center">
               <h4 className="text-primary">{role.name}</h4>
               <div className="relative">
-                <button
-                  onClick={() => handleEllipsisClick(index)}
-                  className="focus:outline-none"
+                <Dropdown
+                  overlay={
+                    <Menu>
+                      <Menu.Item
+                        onClick={() => handleEditClick(role)}
+                        className="hover:bg-gray-200"
+                      >
+                        Edit
+                      </Menu.Item>
+                      <Menu.Item
+                        onClick={() => handleDeleteRole(role._id)}
+                        className="hover:bg-gray-200"
+                      >
+                        Delete
+                      </Menu.Item>
+                    </Menu>
+                  }
+                  trigger={["click"]}
+                  getPopupContainer={(trigger) => trigger.parentNode}
                 >
-                  &#x22EE; {/* Ellipsis icon */}
-                </button>
-
-                {dropdownVisible === index && (
-                  <div className="absolute right-0 mt-2 w-24 bg-white border border-gray-300 rounded shadow-lg">
-                    <button
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                      onClick={() => handleEditClick(role)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="block px-4 py-2 text-sm text-red-700 hover:bg-gray-100 w-full text-left"
-                      onClick={() => handleDeleteRole(role._id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
+                  <Button
+                    className="text-gray-600 hover:text-blue-500"
+                    type="link"
+                    icon={<EllipsisOutlined />}
+                  />
+                </Dropdown>
               </div>
             </div>
             <div className="mt-2">

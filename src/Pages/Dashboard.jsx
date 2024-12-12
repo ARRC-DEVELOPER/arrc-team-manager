@@ -220,11 +220,23 @@ const Dashboard = () => {
       {/* Bar Chart */}
       <div className="bg-white p-4 mt-6 rounded shadow">
         <h3 className="text-lg font-bold mb-4">Task Status Overview</h3>
-        <Bar data={barData} options={{
-          responsive: true,
-          maintainAspectRatio: false,
-        }} />
+        <div className="w-full max-w-6xl mx-auto h-64 md:h-96">
+          <Bar
+            data={barData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'top',
+                },
+              },
+            }}
+          />
+        </div>
       </div>
+
+
 
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Doughnut Chart */}

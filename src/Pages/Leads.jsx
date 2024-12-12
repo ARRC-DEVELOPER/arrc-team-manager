@@ -5,13 +5,66 @@ import axios from "axios";
 import { FiUpload, FiDownload, FiTrash2 } from "react-icons/fi";
 import * as XLSX from "xlsx";
 import { server } from "../main";
-import { message } from "antd";
+import { Modal, Button, Pagination, message } from "antd";
 
 const Leads = () => {
   const [leads, setLeads] = useState([]);
+  const [selectedLeadId, setSelectedLeadId] = useState("");
   const [excelData, setExcelData] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState("");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newLeads, setNewLeads] = useState([{ "Client Name": "", "Mobile Number": "", "City": "" }]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+
+  const handlePaginationChange = (page, size) => {
+    setCurrentPage(page);
+    setPageSize(size);
+  };
+
+  const paginatedLeads = leads.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  const handleAddLeadModalOpen = (leadId) => {
+    setIsAddModalOpen(true);
+    setSelectedLeadId(leadId);
+  };
+
+  const handleAddLeadModalClose = () => {
+    setIsAddModalOpen(false);
+    setNewLeads([{ "Client Name": "", "Mobile Number": "", "City": "" }]);
+  };
+
+  const handleLeadChange = (index, field, value) => {
+    const updatedLeads = [...newLeads];
+    updatedLeads[index][field] = value;
+    setNewLeads(updatedLeads);
+  };
+
+  const addNewRow = () => {
+    setNewLeads([...newLeads, { "Client Name": "", "Mobile Number": "", "City": "" }]);
+  };
+
+  const removeRow = (index) => {
+    const updatedLeads = newLeads.filter((_, i) => i !== index);
+    setNewLeads(updatedLeads);
+  };
+
+  const handleSaveLeads = async () => {
+    try {
+      await axios.post(`${server}/leads/addLead/${selectedLeadId}`, { leads: newLeads });
+      message.success("Leads added successfully");
+      fetchLeads();
+      handleAddLeadModalClose();
+    } catch (error) {
+      console.error("Failed to save leads:", error);
+      message.error("Failed to save leads");
+    }
+  };
 
   const fetchLeads = async () => {
     try {
@@ -98,8 +151,8 @@ const Leads = () => {
 
       {/* List of Uploaded Leads */}
       <div className="mt-6 space-y-4">
-        {leads.length > 0 ? (
-          leads.map((lead) => (
+        {paginatedLeads.length > 0 ? (
+          paginatedLeads.map((lead) => (
             <div
               key={lead._id}
               className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-all duration-200"
@@ -116,28 +169,61 @@ const Leads = () => {
                 </p>
               </div>
 
+              {/* Upload Button */}
+              <div className="relative group">
+                <a
+                  onClick={() => handleAddLeadModalOpen(lead._id)}
+                  className="flex items-center justify-center p-2 bg-teal-600 text-white rounded-full hover:bg-teal-700 transition duration-200 ease-in-out transform hover:scale-110"
+                >
+                  <FiUpload />
+                </a>
+                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 bg-gray-800 text-white text-xs rounded py-1 px-2 transition duration-200">
+                  Upload Lead
+                </span>
+              </div>
+
               {/* Download Button */}
-              <a
-                href={lead.fileUrl}
-                download
-                className="flex items-center justify-center p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-200 ease-in-out transform hover:scale-110"
-              >
-                <FiDownload />
-              </a>
+              <div className="relative group ml-2">
+                <a
+                  href={lead.fileUrl}
+                  download
+                  className="flex items-center justify-center p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-200 ease-in-out transform hover:scale-110"
+                >
+                  <FiDownload />
+                </a>
+                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 bg-gray-800 text-white text-xs rounded py-1 px-2 transition duration-200">
+                  Download
+                </span>
+              </div>
 
               {/* Delete Button */}
-              <button
-                onClick={() => handleDeleteLead(lead._id)}
-                className="flex items-center justify-center p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition duration-200 ease-in-out transform hover:scale-110 ml-2"
-              >
-                <FiTrash2 />
-              </button>
+              <div className="relative group ml-2">
+                <button
+                  onClick={() => handleDeleteLead(lead._id)}
+                  className="flex items-center justify-center p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition duration-200 ease-in-out transform hover:scale-110"
+                >
+                  <FiTrash2 />
+                </button>
+                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 bg-gray-800 text-white text-xs rounded py-1 px-2 transition duration-200">
+                  Delete
+                </span>
+              </div>
             </div>
           ))
         ) : (
           <p className="text-gray-500">No leads uploaded yet.</p>
         )}
       </div>
+
+      <Pagination
+        current={currentPage}
+        pageSize={pageSize}
+        total={leads.length}
+        onChange={handlePaginationChange}
+        showSizeChanger
+        pageSizeOptions={['6', '12', '24']}
+        className="w-[20%] mt-4 m-auto"
+      />
 
       {/* Modal for Excel File Preview */}
       {isModalOpen && (
@@ -181,6 +267,57 @@ const Leads = () => {
           </div>
         </div>
       )}
+
+      {/* Modal for Adding Leads */}
+      <Modal
+        title="Add Lead"
+        visible={isAddModalOpen}
+        onCancel={handleAddLeadModalClose}
+        footer={null}
+      >
+        {newLeads.map((lead, index) => (
+          <div key={index} className="grid grid-cols-4 gap-4 mb-4">
+            <input
+              type="text"
+              placeholder="Client Name"
+              value={lead["Calinet Name"]}
+              onChange={(e) => handleLeadChange(index, "Calinet Name", e.target.value)}
+              className="p-2 border rounded"
+            />
+            <input
+              type="text"
+              placeholder="Mobile Number"
+              value={lead["Mobile Number"]}
+              onChange={(e) => handleLeadChange(index, "Mobile Number", e.target.value)}
+              className="p-2 border rounded"
+            />
+            <input
+              type="text"
+              placeholder="City"
+              value={lead.City}
+              onChange={(e) => handleLeadChange(index, "City", e.target.value)}
+              className="p-2 border rounded"
+            />
+            <button
+              onClick={() => removeRow(index)}
+              className="p-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+        <button
+          onClick={addNewRow}
+          className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 mb-4"
+        >
+          Add Another Lead
+        </button>
+        <div className="flex justify-end">
+          <Button type="primary" onClick={handleSaveLeads}>
+            Save Leads
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

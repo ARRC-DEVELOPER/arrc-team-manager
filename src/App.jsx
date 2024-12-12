@@ -26,10 +26,9 @@ import Users from "./Pages/Users";
 import ArchivedUsers from "./Pages/ArchivedUsers";
 import Roles from "./Pages/Roles";
 import Sales from "./Pages/Sales";
-import ActivityLogs from "./Pages/ActivityLogs";
-import Events from "./Pages/Events";
-import Team from "./Pages/Team";
-import Trash from "./Pages/Trash";
+// import ActivityLogs from "./Pages/ActivityLogs";
+// import Events from "./Pages/Events";
+// import Team from "./Pages/Team";
 import Login from "./Login/login";
 import Tags from "./Pages/Settings/Tags";
 import Status from "./Components/Subpage/Tasks/Status";
@@ -160,10 +159,9 @@ const AppContent = ({
                   <Route path="/sales" element={<LeadTask />} />
                 )}
 
-                <Route path="/activity-logs" element={<ActivityLogs />} />
+                {/* <Route path="/activity-logs" element={<ActivityLogs />} /> */}
                 {/* <Route path="/events" element={<Events />} /> */}
-                <Route path="/team" element={<Team />} />
-                <Route path="/trashed" element={<Trash />} />
+                {/* <Route path="/team" element={<Team />} /> */}
                 <Route path="/tasks-data" element={<Tasks loggedInUser={loggedInUser} />} />
                 <Route path="/tasks/status" element={<Status />} />
                 <Route path="/tags" element={<Tags />} />

@@ -14,6 +14,25 @@ const Board = ({ loggedInUser }) => {
   const [cards, setCards] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  const handleUserChange = (event) => {
+    const userId = event.target.value;
+
+    console.log(userId);
+    setSelectedUser(userId);
+    fetchTasks(userId);
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const usersResponse = await axios.get(`${server}/users`);
+      setUsers(usersResponse.data);
+    } catch (error) {
+      console.error("Error fetching users", error);
+    }
+  };
 
   const handleEditTask = (task) => {
     setEditingTask(task);
@@ -28,14 +47,17 @@ const Board = ({ loggedInUser }) => {
     }
   };
 
-  const fetchTasks = async () => {
+  const fetchTasks = async (userId = null) => {
     const token = localStorage.getItem("authToken");
 
     try {
-      const response = await axios.get(`${server}/tasks`, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${server}/getTasks${userId ? `?userId=${userId}` : ""}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
       setCards(response.data);
     } catch (error) {
       console.error("Error fetching tasks", error);
@@ -56,6 +78,7 @@ const Board = ({ loggedInUser }) => {
     const fetchData = async () => {
       await fetchTasks();
       await fetchStatuses();
+      await fetchUsers();
     };
 
     fetchData();
@@ -69,15 +92,35 @@ const Board = ({ loggedInUser }) => {
     <>
       {
         loggedInUser?.role?.name == "Admin" || loggedInUser?.role?.name == "Manager" ? (
-          <AddTask
-            setCards={setCards}
-            editingTask={editingTask}
-            setEditingTask={setEditingTask}
-          />
+          <>
+            <AddTask
+              setCards={setCards}
+              editingTask={editingTask}
+              setEditingTask={setEditingTask}
+            />
+
+            <div className="w-[90%] m-auto">
+              <select
+                className="bg-gray-100 border border-gray-300 rounded-lg shadow-sm text-gray-700 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300"
+                value={selectedUser || ""}
+                onChange={handleUserChange}
+              >
+                <option value="" className="text-gray-500">
+                  All Users
+                </option>
+                {users.map((user) => (
+                  <option key={user._id} value={user._id}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </>
         ) : (
           <></>
         )
       }
+
 
       <div className="flex flex-wrap h-full justify-center align-middle w-full gap-3 overflow-x-auto p-12 space-y-4 md:space-y-0">
         {statuses.map((status) => (

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { server } from "../../../main";
+import { Dropdown, Menu, Button } from "antd";
+import { EllipsisOutlined } from "@ant-design/icons";
 
 const Status = () => {
   const [statuses, setStatuses] = useState([]);
@@ -10,7 +12,6 @@ const Status = () => {
   const [showForm, setShowForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
-  const [dropdownVisible, setDropdownVisible] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const itemsPerPage = 12;
@@ -71,10 +72,6 @@ const Status = () => {
         console.error("Error deleting status:", error);
       }
     }
-  };
-
-  const handleEllipsisClick = (index) => {
-    setDropdownVisible(dropdownVisible === index ? null : index);
   };
 
   const handlePageChange = (page) => {
@@ -152,26 +149,32 @@ const Status = () => {
               className="relative bg-white p-4 border rounded shadow-md hover:shadow-lg transition-shadow duration-300"
             >
               <div className="absolute top-2 right-2">
-                <button onClick={() => handleEllipsisClick(index)}>
-                  &#x22EE;
-                </button>
-
-                {dropdownVisible === index && (
-                  <div className="absolute right-0 mt-2 w-24 bg-white border border-gray-300 rounded shadow-lg">
-                    <button
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-right"
-                      onClick={() => handleEditClick(status)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="block px-4 py-2 text-sm text-red-700 hover:bg-gray-100 w-full text-right"
-                      onClick={() => handleDeleteClick(status._id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
+                <Dropdown
+                  overlay={
+                    <Menu>
+                      <Menu.Item
+                        onClick={() => handleEditClick(status)}
+                        className="hover:bg-gray-200"
+                      >
+                        Edit
+                      </Menu.Item>
+                      <Menu.Item
+                        onClick={() => handleDeleteClick(status._id)}
+                        className="hover:bg-gray-200"
+                      >
+                        Delete
+                      </Menu.Item>
+                    </Menu>
+                  }
+                  trigger={["click"]}
+                  getPopupContainer={(trigger) => trigger.parentNode}
+                >
+                  <Button
+                    className="text-gray-600 hover:text-blue-500"
+                    type="link"
+                    icon={<EllipsisOutlined />}
+                  />
+                </Dropdown>
               </div>
 
               <h2 className="text-lg font-semibold">{status.name}</h2>
@@ -195,11 +198,10 @@ const Status = () => {
           <button
             key={index}
             onClick={() => handlePageChange(index + 1)}
-            className={`px-3 py-2 mx-1 border rounded ${
-              currentPage === index + 1
-                ? "bg-blue-600 text-white"
-                : "border-gray-300 hover:bg-gray-100"
-            }`}
+            className={`px-3 py-2 mx-1 border rounded ${currentPage === index + 1
+              ? "bg-blue-600 text-white"
+              : "border-gray-300 hover:bg-gray-100"
+              }`}
           >
             {index + 1}
           </button>

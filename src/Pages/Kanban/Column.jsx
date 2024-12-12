@@ -67,11 +67,11 @@ const Column = ({
         console.log("Card updated: ", updatedCard);
 
         const token = localStorage.getItem("authToken");
-        const response = await axios.get(`${server}/tasks`, {
+        const response = await axios.get(`${server}/getTasks`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         });
-        
+
         setCards(response.data);
       } catch (err) {
         console.error("Error updating card:", err);

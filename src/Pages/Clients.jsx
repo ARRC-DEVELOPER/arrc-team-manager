@@ -4,13 +4,14 @@ import {
   Select,
   Form,
   Input,
-  message,
+  message, Dropdown, Menu, Button, Pagination
 } from "antd";
 
 import {
   UserOutlined,
   MailOutlined,
   PhoneOutlined,
+  EllipsisOutlined
 } from "@ant-design/icons";
 
 import axios from "axios";
@@ -38,11 +39,18 @@ const Clients = ({ loggedInUser }) => {
   const [clients, setClients] = useState([]);
   const [form] = Form.useForm();
 
-  const [dropdownIndex, setDropdownIndex] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
 
-  const handleDropdownToggle = (index) => {
-    setDropdownIndex((prev) => (prev === index ? null : index));
+  const handlePaginationChange = (page, size) => {
+    setCurrentPage(page);
+    setPageSize(size);
   };
+
+  const paginatedClients = clients.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   useEffect(() => {
     fetchClients();
@@ -215,8 +223,8 @@ const Clients = ({ loggedInUser }) => {
         {loading ? (
           <Shimmer />
         ) : (
-          clients.length > 0 ? (
-            clients.map((client, index) => (
+          paginatedClients.length > 0 ? (
+            paginatedClients.map((client, index) => (
               <div
                 key={index}
                 className="bg-white p-4 border rounded shadow-md hover:shadow-lg transition relative"
@@ -245,33 +253,36 @@ const Clients = ({ loggedInUser }) => {
 
                 {
                   loggedInUser?.role?.name == "Admin" || loggedInUser?.role?.name == "Manager" ? (
-                    <button
-                      className="absolute top-2 right-2 text-gray-600 focus:outline-none"
-                      onClick={() => handleDropdownToggle(index)}
+                    <Dropdown
+                      overlay={
+                        <Menu>
+                          <Menu.Item
+                            onClick={() => showModal(client)}
+                            className="hover:bg-gray-200"
+                          >
+                            Edit
+                          </Menu.Item>
+                          <Menu.Item
+                            onClick={() => handleArchiveUser(client._id)}
+                            className="hover:bg-gray-200"
+                          >
+                            Delete
+                          </Menu.Item>
+                        </Menu>
+                      }
+                      trigger={["click"]}
+                      getPopupContainer={(trigger) => trigger.parentNode}
                     >
-                      ⋮
-                    </button>
+                      <Button
+                        className="text-gray-600 hover:text-blue-500 absolute top-0 right-2"
+                        type="link"
+                        icon={<EllipsisOutlined />}
+                      />
+                    </Dropdown>
                   ) : (
                     <></>
                   )
                 }
-
-                {dropdownIndex === index && (
-                  <div className="absolute top-10 right-2 bg-white border rounded shadow-md z-10">
-                    <button
-                      onClick={() => showModal(client)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleArchiveUser(client._id)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
               </div>
             ))
           ) : (
@@ -279,6 +290,16 @@ const Clients = ({ loggedInUser }) => {
           )
         )}
       </div>
+
+      <Pagination
+        current={currentPage}
+        pageSize={pageSize}
+        total={clients.length}
+        onChange={handlePaginationChange}
+        showSizeChanger
+        pageSizeOptions={['6', '12', '24']}
+        className="w-[20%] mt-4 m-auto"
+      />
 
       <Modal
         title={editingUser ? "Edit Client" : "New Client"}

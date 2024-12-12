@@ -5,7 +5,7 @@ import axios from "axios";
 import { Modal, Button } from "antd";
 import { toast } from "react-toastify";
 import { server } from "../main";
-import { message } from "antd";
+import { message, Pagination } from "antd";
 import { FiDownload, FiTrash2 } from "react-icons/fi";
 import * as XLSX from "xlsx";
 
@@ -21,6 +21,14 @@ const Sales = () => {
   const [excelData, setExcelData] = useState(null);
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
   const [followUpLeads, setFollowUpLeads] = useState([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+
+  const handlePaginationChange = (page, size) => {
+    setCurrentPage(page);
+    setPageSize(size);
+  };
 
   const fetchUsers = async () => {
     try {
@@ -128,6 +136,11 @@ const Sales = () => {
   const assignedLeads = leads.filter((lead) => lead.assignedTo.length !== 0);
   const notAssignedLeads = leads.filter((lead) => lead.assignedTo.length === 0);
 
+  const paginatedLeads = assignedLeads.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   return (
     <div className="px-4 sm:px-6 lg:px-8 max-w-full">
       <div className="flex flex-col sm:flex-row justify-between items-center">
@@ -143,8 +156,8 @@ const Sales = () => {
 
       {/* List of Assigned Leads */}
       <div className="mt-6 space-y-4">
-        {assignedLeads.length > 0 ? (
-          assignedLeads.map((lead) => (
+        {paginatedLeads.length > 0 ? (
+          paginatedLeads.map((lead) => (
             <div
               key={lead._id}
               className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200"
@@ -222,6 +235,16 @@ const Sales = () => {
           <p className="text-gray-500">No leads assigned yet.</p>
         )}
       </div>
+
+      <Pagination
+        current={currentPage}
+        pageSize={pageSize}
+        total={assignedLeads.length}
+        onChange={handlePaginationChange}
+        showSizeChanger
+        pageSizeOptions={['6', '12', '24']}
+        className="w-[20%] mt-4 m-auto"
+      />
 
       {/* Modal for Add/Update Leads */}
       <Modal

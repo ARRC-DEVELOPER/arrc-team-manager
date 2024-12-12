@@ -72,9 +72,13 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
         const usersResponse = await axios.get(`${server}/users`);
         setUsers(usersResponse.data);
 
+        const token = localStorage.getItem("authToken");
         const [statusesResponse, tasksResponse] = await Promise.all([
           axios.get(`${server}/statuses`),
-          axios.get(`${server}/tasks`),
+          axios.get(`${server}/getTasks`, {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }),
         ]);
 
         const statuses = statusesResponse.data;
@@ -258,7 +262,12 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
         );
 
         // Re-fetch tasks after updating
-        const updatedTasks = await axios.get(`${server}/tasks`);
+        const token = localStorage.getItem("authToken");
+        const updatedTasks = await axios.get(`${server}/getTasks`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          });
         setCards(updatedTasks.data);
 
         setIsModalVisibleNew(false);
@@ -283,7 +292,7 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
 
         // Re-fetch tasks after updating
         const token = localStorage.getItem("authToken");
-        const updatedTasks = await axios.get(`${server}/tasks`, {
+        const updatedTasks = await axios.get(`${server}/getTasks`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         });
