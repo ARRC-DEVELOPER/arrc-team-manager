@@ -37,7 +37,7 @@ import Taxes from "./Pages/Settings/Taxes";
 import Settings from "./Pages/Settings/Settings";
 
 // Subpages
-import SimpleTabs from "./Components/Subpage/SimpleTabs";
+import ProjectDetails from "./Components/Subpage/ProjectDetails";
 import GoogleCallback from "./Pages/GoogleCallback";
 import CalendarPage from "./Pages/Calendar";
 import UserDetails from "./Pages/UserDetails";
@@ -117,6 +117,8 @@ const AppContent = ({
                 <Route path="/departments" element={<Departments />} />
                 <Route path="/clients" element={<Clients loggedInUser={loggedInUser} />} />
                 <Route path="/projects" element={<Projects loggedInUser={loggedInUser} />} />
+                <Route path="/project/:projectId" element={<ProjectDetails />} />
+                <Route path="/simpletab" element={<ProjectDetails />} />
                 <Route path="/tasks" element={<Tasks loggedInUser={loggedInUser} />} />
                 {/* <Route path="/calendar" element={<CalendarPage />} /> */}
                 {/* <Route path="/reports" element={<Reports />} /> */}
@@ -168,7 +170,6 @@ const AppContent = ({
                 <Route path="/activity-types" element={<ActivityTypes />} />
                 <Route path="/taxes" element={<Taxes />} />
                 <Route path="/settings" element={<Settings />} />
-                <Route path="/simpletab" element={<SimpleTabs />} />
               </>
             ) : (
               <Route

@@ -1,12 +1,192 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { server } from "../../main.jsx";
+import { useParams } from 'react-router-dom';
+import { message } from "antd";
 
-const SimpleTabs = () => {
+const AddNote = ({ projectId, fetchNotes }) => {
+  const [noteText, setNoteText] = useState("");
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const fileInputRef = React.useRef();
+
+  const handleAddNote = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!noteText.trim()) return alert("Note text cannot be empty");
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("text", noteText);
+      if (file) formData.append("file", file);
+
+      await axios.post(`${server}/notes/addNote/${projectId}`, formData, {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      });
+
+      message.success("Note added successfully");
+
+      setNoteText("");
+      setFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      fetchNotes();
+    } catch (error) {
+      console.error("Error adding note:", error);
+      message.error(`${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-white p-4 shadow-md rounded-md mb-4">
+      <textarea
+        className="w-full p-2 border rounded-md"
+        placeholder="Write your note here..."
+        value={noteText}
+        onChange={(e) => setNoteText(e.target.value)}
+        rows={3}
+      ></textarea>
+
+      <input
+        type="file"
+        className="block mt-2"
+        ref={fileInputRef}
+        onChange={(e) => setFile(e.target.files[0])}
+      />
+
+      <button
+        className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+        onClick={handleAddNote}
+        disabled={loading}
+      >
+        {loading ? "Adding..." : "Add Note"}
+      </button>
+    </div>
+  );
+};
+
+const NotesList = ({ notes }) => {
+  return (
+    <div className="bg-white p-4 shadow-md rounded-md">
+      {notes.length > 0 ? (
+        notes.map((note) => (
+          <div key={note._id} className="p-2 mb-2 border-b flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold">{note.text}</h3>
+              {note.file && (
+                <a
+                  href={`${note.file}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 underline"
+                >
+                  View File
+                </a>
+              )}
+              <p className="text-sm text-gray-500">Created by: {note.createdBy.name}</p>
+            </div>
+            <p className="text-sm text-gray-500">{new Intl.DateTimeFormat('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+            }).format(new Date(note.createdAt))}</p>
+          </div>
+        ))
+      ) : (
+        <p className="text-gray-500">No notes available.</p>
+      )}
+    </div>
+  );
+};
+
+const PaginationControls = ({ totalPages, currentPage, onPageChange }) => {
+  return (
+    <div className="flex justify-center mt-4">
+      <button
+        className="px-4 py-2 border rounded-l-md"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+      >
+        Previous
+      </button>
+      <span className="px-4 py-2 border">{`Page ${currentPage} of ${totalPages}`}</span>
+      <button
+        className="px-4 py-2 border rounded-r-md"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+      >
+        Next
+      </button>
+    </div>
+  );
+};
+
+const ProjectDetails = () => {
   const [activeTab, setActiveTab] = useState('summary');
   const [projectData, setProjectData] = useState(null);
   const [users, setUsers] = useState([]);
   const [client, setClient] = useState(null);
+  const [notes, setNotes] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({ totalPages: 1, currentPage: 1 });
+  const [taskPagination, setTaskPagination] = useState({ totalPages: 1, currentPage: 1 });
+  const { projectId } = useParams();
+
+  console.log(tasks);
+
+  const fetchNotes = async (projectId = null, page = 1) => {
+    const token = localStorage.getItem("authToken");
+    setLoading(true);
+    try {
+      const endpoint = projectId
+        ? `${server}/notes/getNotesByProject/${projectId}?page=${page}&limit=5`
+        : `${server}/notes/getNotesByClientId?page=${page}&limit=5`;
+
+      const response = await axios.get(endpoint, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const { notes, totalPages, currentPage } = response.data;
+
+      setNotes(notes);
+      setPagination({ totalPages, currentPage });
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTasks = async (projectId = null, page = 1) => {
+    setLoading(true);
+    try {
+      const endpoint = `${server}/tasks/project/${projectId}`
+
+      const response = await axios.get(endpoint);
+      console.log(response);
+
+      const tasks = response.data;
+
+      setTasks(tasks);
+      // setTaskPagination({ totalPages, currentPage });
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,6 +206,8 @@ const SimpleTabs = () => {
     };
 
     fetchData();
+    fetchNotes(projectId);
+    fetchTasks(projectId);
   }, []);
 
   // Check if projectData, client, and users are loaded
@@ -36,7 +218,7 @@ const SimpleTabs = () => {
   // Ensure members array exists
   const projectMembers = Array.isArray(projectData.users)
     ? users.filter(user => projectData.users.includes(user._id))
-    : []; // Fallback to an empty array if users is not defined or not an array
+    : []; 
 
   return (
     <div className="mb-5">
@@ -58,20 +240,13 @@ const SimpleTabs = () => {
               Activity
             </button>
           </li>
+
           <li>
             <button
               className={`p-3 py-2 -mb-[1px] block ${activeTab === 'tasks' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-600'}`}
               onClick={() => setActiveTab('tasks')}
             >
               Tasks
-            </button>
-          </li>
-          <li>
-            <button
-              className={`p-3 py-2 -mb-[1px] block ${activeTab === 'attachments' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-600'}`}
-              onClick={() => setActiveTab('attachments')}
-            >
-              Attachments
             </button>
           </li>
         </ul>
@@ -171,67 +346,38 @@ const SimpleTabs = () => {
             </div>
 
             {/* Side Information */}
-            <div className="grid grid-cols-1 gap-4">
-              <div className="card bg-white shadow-md p-4">
-                <div className="flex items-center">
-                  <div className="rounded-full bg-blue-600 p-3 text-white">
-                    <i className="fas fa-money-bill-alt"></i>
-                  </div>
-                  <div className="ml-4">
-                    <label className="text-gray-700 font-semibold">Budget</label>
-                    <p className="text-gray-900 text-xl">${projectData.budget || 'N/A'}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="card bg-white shadow-md p-4">
-                <div className="flex items-center">
-                  <div className="rounded-full bg-blue-600 p-3 text-white">
-                    <i className="fas fa-money-check-alt"></i>
-                  </div>
-                  <div className="ml-4">
-                    <label className="text-gray-700 font-semibold">Budget Type</label>
-                    <p className="text-gray-900">{projectData.budgetType || 'N/A'}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="card bg-white shadow-md p-4">
-                <div className="flex items-center">
-                  <div className="rounded-full bg-blue-600 p-3 text-white">
-                    <i className="fas fa-users"></i>
-                  </div>
-                  <div className="ml-4">
-                    <label className="text-gray-700 font-semibold">Team Size</label>
-                    <p className="text-gray-900">{projectMembers.length}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <AddNote projectId={projectId} />
           </div>
         )}
 
         {activeTab === 'activity' && (
           <div>
-            <h4 className="text-lg font-semibold">Activity Log</h4>
-            {/* Placeholder for activity log */}
-            <p>No activity logged yet.</p>
+            <NotesList notes={notes} />
+            <PaginationControls
+              totalPages={pagination.totalPages}
+              currentPage={pagination.currentPage}
+              onPageChange={(page) => fetchNotes(projectId, page)}
+            />
           </div>
         )}
 
         {activeTab === 'tasks' && (
           <div>
-            <h4 className="text-lg font-semibold">Tasks</h4>
-            {/* Placeholder for tasks */}
-            <p>No tasks available.</p>
-          </div>
-        )}
-
-        {activeTab === 'attachments' && (
-          <div>
-            <h4 className="text-lg font-semibold">Attachments</h4>
-            {/* Placeholder for attachments */}
-            <p>No attachments available.</p>
+            <div className="bg-white p-4 shadow-md rounded-md">
+              {tasks.length > 0 ? (
+                tasks.map((note) => (
+                  <div key={note._id} className="p-2 mb-2 border-b flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold">{note.title}</h3>
+                      
+                      {/* <p className="text-sm text-gray-500">Created by: {note.createdBy.name}</p> */}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500">No tasks available.</p>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -239,4 +385,4 @@ const SimpleTabs = () => {
   );
 };
 
-export default SimpleTabs;
+export default ProjectDetails;

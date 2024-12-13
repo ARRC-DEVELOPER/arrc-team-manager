@@ -73,7 +73,7 @@ const Notes = () => {
         const token = localStorage.getItem("authToken");
         setLoading(true);
         try {
-            const endpoint = projectId
+            const endpoint = projectId 
                 ? `${server}/notes/getNotesByProject/${projectId}?page=${page}&limit=5`
                 : `${server}/notes/getNotesByClientId?page=${page}&limit=5`;
 

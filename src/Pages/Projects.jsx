@@ -46,8 +46,6 @@ const Projects = ({ loggedInUser }) => {
   const [pageSize] = useState(6);
   const navigate = useNavigate();
 
-  console.log(clients);
-
   useEffect(() => {
     fetchProjects();
     fetchUsers();
@@ -160,8 +158,8 @@ const Projects = ({ loggedInUser }) => {
     currentPage * pageSize
   );
 
-  const handleProjectClick = () => {
-    navigate("/simpletab");
+  const handleProjectClick = (projectId) => {
+    navigate(`/project/${projectId}`);
   };
 
   return (
@@ -193,7 +191,7 @@ const Projects = ({ loggedInUser }) => {
                       <span>{project.prefix}</span>
                       <span
                         className="text-primary cursor-pointer"
-                        onClick={handleProjectClick}
+                        onClick={() => handleProjectClick(project._id)}
                       >
                         {project.name}
                       </span>
