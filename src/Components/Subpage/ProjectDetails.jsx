@@ -130,7 +130,7 @@ const PaginationControls = ({ totalPages, currentPage, onPageChange }) => {
   );
 };
 
-const ProjectDetails = () => {
+const ProjectDetails = ({ loggedInUser }) => {
   const [activeTab, setActiveTab] = useState('summary');
   const [projectData, setProjectData] = useState(null);
   const [users, setUsers] = useState([]);
@@ -141,8 +141,6 @@ const ProjectDetails = () => {
   const [pagination, setPagination] = useState({ totalPages: 1, currentPage: 1 });
   const [taskPagination, setTaskPagination] = useState({ totalPages: 1, currentPage: 1 });
   const { projectId } = useParams();
-
-  console.log(tasks);
 
   const fetchNotes = async (projectId = null, page = 1) => {
     const token = localStorage.getItem("authToken");
@@ -218,7 +216,7 @@ const ProjectDetails = () => {
   // Ensure members array exists
   const projectMembers = Array.isArray(projectData.users)
     ? users.filter(user => projectData.users.includes(user._id))
-    : []; 
+    : [];
 
   return (
     <div className="mb-5">
@@ -255,7 +253,8 @@ const ProjectDetails = () => {
       {/* Tab Content */}
       <div className="pt-5">
         {activeTab === 'summary' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className={`grid grid-cols-1 gap-4 ${loggedInUser.role.name !== "Admin" ? "md:grid-cols-1" : "md:grid-cols-3"
+            }`}>
             <div className="md:col-span-2">
               <h4 className="text-xl font-semibold mb-4">{projectData.projectCode}</h4>
               <div className="card border-t-4 border-blue-600 bg-white shadow-md p-4">
@@ -346,7 +345,11 @@ const ProjectDetails = () => {
             </div>
 
             {/* Side Information */}
-            <AddNote projectId={projectId} />
+            {
+              loggedInUser.role.name === "Admin" && (
+                <AddNote projectId={projectId} fetchNotes={fetchNotes} />
+              )
+            }
           </div>
         )}
 
@@ -369,7 +372,7 @@ const ProjectDetails = () => {
                   <div key={note._id} className="p-2 mb-2 border-b flex items-center justify-between">
                     <div>
                       <h3 className="font-semibold">{note.title}</h3>
-                      
+
                       {/* <p className="text-sm text-gray-500">Created by: {note.createdBy.name}</p> */}
                     </div>
                   </div>

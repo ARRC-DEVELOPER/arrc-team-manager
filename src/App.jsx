@@ -117,12 +117,11 @@ const AppContent = ({
                 <Route path="/departments" element={<Departments />} />
                 <Route path="/clients" element={<Clients loggedInUser={loggedInUser} />} />
                 <Route path="/projects" element={<Projects loggedInUser={loggedInUser} />} />
-                <Route path="/project/:projectId" element={<ProjectDetails />} />
+                <Route path="/project/:projectId" element={<ProjectDetails loggedInUser={loggedInUser} />} />
                 <Route path="/simpletab" element={<ProjectDetails />} />
                 <Route path="/tasks" element={<Tasks loggedInUser={loggedInUser} />} />
                 {/* <Route path="/calendar" element={<CalendarPage />} /> */}
                 {/* <Route path="/reports" element={<Reports />} /> */}
-
                 {loggedInUser.role.name === "Admin" ||
                   loggedInUser.role.name === "Manager" ? (
                   <Route path="/tickets" element={<TicketList />} />

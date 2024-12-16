@@ -11,18 +11,8 @@ const ArchivedUsers = () => {
   const [archivedUsers, setArchivedUsers] = useState([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchArchivedUsers();
-  }, []);
-
-  const fetchArchivedUsers = async () => {
-    try {
-      const response = await axios.get(`${server}/users/archived`);
-      setArchivedUsers(response.data);
-    } catch (error) {
-      message.error("Failed to fetch archived users");
-    }
-  };
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const handleUnarchive = async (userId) => {
     const token = localStorage.getItem("authToken");
@@ -42,6 +32,34 @@ const ArchivedUsers = () => {
       message.error("Failed to unarchive user");
     }
   };
+
+  const fetchArchivedUsers = async (page = 1) => {
+    try {
+      const response = await axios.get(
+        `${server}/users/archived?page=${page}&limit=10`
+      );
+
+      const { data, currentPage, totalPages } = response.data;
+      setArchivedUsers(data);
+      setCurrentPage(currentPage);
+      setTotalPages(totalPages);
+    } catch (error) {
+      console.error("Error fetching history leaves:", error);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  useEffect(() => {
+    fetchArchivedUsers(currentPage);
+
+    // Refresh data every 10 minutes
+    const interval = setInterval(() => fetchArchivedUsers(currentPage), 10 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [currentPage]);
 
   const columns = [
     {
@@ -97,6 +115,25 @@ const ArchivedUsers = () => {
         pagination={false}
         className="user-table overflow-x-auto"
       />
+
+      {/* Pagination Controls */}
+      <div className="mt-4 flex justify-center space-x-2">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition disabled:bg-gray-300"
+        >
+          Previous
+        </button>
+        <span className="py-2 px-4">{`Page ${currentPage} of ${totalPages}`}</span>
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition disabled:bg-gray-300"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

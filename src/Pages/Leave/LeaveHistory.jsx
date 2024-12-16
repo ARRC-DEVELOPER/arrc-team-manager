@@ -5,25 +5,45 @@ import { server } from "../../main";
 
 function LeaveHistory() {
   const [historyLeaves, setHistoryLeaves] = useState([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   const token = localStorage.getItem("authToken");
   const navigate = useNavigate();
 
-  const fetchHistoryLeaves = async () => {
+  const fetchHistoryLeaves = async (page = 1) => {
     try {
-      const response = await axios.get(`${server}/leaves/getManagerLeaves`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setHistoryLeaves(response.data);
+      const response = await axios.get(
+        `${server}/leaves/getManagerLeaves?page=${page}&limit=6`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const { data, currentPage, totalPages } = response.data;
+      setHistoryLeaves(data);
+      setCurrentPage(currentPage);
+      setTotalPages(totalPages);
     } catch (error) {
-      console.error("Error fetching history tickets:", error);
+      console.error("Error fetching history leaves:", error);
     }
   };
 
   useEffect(() => {
-    fetchHistoryLeaves();
-  }, []);
+    fetchHistoryLeaves(currentPage);
+
+    // Refresh data every 10 minutes
+    const interval = setInterval(() => fetchHistoryLeaves(currentPage), 10 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [currentPage]);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
 
   // Filter tickets to only show those that are in history
   const activeLeaves = historyLeaves.filter((leave) => leave.history);
@@ -73,13 +93,12 @@ function LeaveHistory() {
             {activeLeaves.map((leave) => (
               <tr
                 key={leave._id}
-                className={`border-b border-gray-200 hover:bg-gray-100 transition duration-200 ${
-                  leave.status === "Rejected"
-                    ? "bg-yellow-100"
-                    : leave.status === "Approved"
+                className={`border-b border-gray-200 hover:bg-gray-100 transition duration-200 ${leave.status === "Rejected"
+                  ? "bg-yellow-100"
+                  : leave.status === "Approved"
                     ? "bg-green-100"
                     : "bg-white"
-                }`}
+                  }`}
               >
                 <td className="py-3 px-6 text-left">{leave.employeeId.name}</td>
                 <td className="py-3 px-6 text-left">
@@ -89,13 +108,12 @@ function LeaveHistory() {
                 <td className="py-3 px-6 text-left">{leave.reason}</td>
                 <td className="py-3 px-6 text-center">
                   <span
-                    className={`text-xs font-semibold inline-block py-1 px-3 rounded-full text-white ${
-                      leave.status === "Pending"
-                        ? "bg-blue-500"
-                        : leave.status === "Rejected"
+                    className={`text-xs font-semibold inline-block py-1 px-3 rounded-full text-white ${leave.status === "Pending"
+                      ? "bg-blue-500"
+                      : leave.status === "Rejected"
                         ? "bg-yellow-500"
                         : "bg-green-500"
-                    }`}
+                      }`}
                   >
                     {leave.status}
                   </span>
@@ -122,6 +140,25 @@ function LeaveHistory() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="mt-4 flex justify-center space-x-2">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition disabled:bg-gray-300"
+        >
+          Previous
+        </button>
+        <span className="py-2 px-4">{`Page ${currentPage} of ${totalPages}`}</span>
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition disabled:bg-gray-300"
+        >
+          Next
+        </button>
       </div>
     </div>
   );

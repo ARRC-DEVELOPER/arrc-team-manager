@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { server } from "../../main";
+import { message, Pagination } from "antd";
 
 function LeaveForm() {
   const [startDate, setStartDate] = useState("");
@@ -14,6 +15,14 @@ function LeaveForm() {
   const [modalContent, setModalContent] = useState([]);
   const token = localStorage.getItem("authToken");
   const navigate = useNavigate();
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+
+  const handlePaginationChange = (page, size) => {
+    setCurrentPage(page);
+    setPageSize(size);
+  };
 
   const handleFileChange = (e) => {
     setAttachments([...e.target.files]);
@@ -43,6 +52,11 @@ function LeaveForm() {
   // Filter leaves to only show those that are not yet in history
   const activeLeaves = leaves.filter((leave) => !leave.history);
 
+  const paginatedLeaves = activeLeaves.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   const handleSubmit = async () => {
     const formData = new FormData();
     formData.append("reason", reason);
@@ -67,9 +81,10 @@ function LeaveForm() {
         console.log("Leave applied successfully:", response.data);
         setIsModalOpen(false);
         fetchLeaves();
-        toast.success("Leave applied successfully!");
+        message.success("Leave applied successfully!");
       } else {
         console.error("Failed to apply leave");
+        message.error("Failed to apply leave");
       }
     } catch (error) {
       console.error("Error applying leave:", error);
@@ -197,16 +212,15 @@ function LeaveForm() {
         </div>
 
         <ul className="space-y-4">
-          {activeLeaves.map((leave) => (
+          {paginatedLeaves.map((leave) => (
             <li
               key={leave._id}
-              className={`p-4 border rounded-lg shadow-md hover:shadow-lg transition-shadow flex items-center justify-between ${
-                leave.feedback === "Emergency Leave"
-                  ? "bg-red-100"
-                  : leave.feedback === "Thank You"
+              className={`p-4 border rounded-lg shadow-md hover:shadow-lg transition-shadow flex items-center justify-between ${leave.feedback === "Emergency Leave"
+                ? "bg-red-100"
+                : leave.feedback === "Thank You"
                   ? "bg-green-100"
                   : "bg-white"
-              }`}
+                }`}
             >
               <div>
                 <h3 className="text-lg font-medium">{leave.reason}</h3>
@@ -247,13 +261,12 @@ function LeaveForm() {
 
               <div>
                 <span
-                  className={`text-xs font-semibold inline-block py-1 px-3 rounded-full text-white ${
-                    leave.status === "Pending"
-                      ? "bg-blue-500"
-                      : leave.status === "Rejected"
+                  className={`text-xs font-semibold inline-block py-1 px-3 rounded-full text-white ${leave.status === "Pending"
+                    ? "bg-blue-500"
+                    : leave.status === "Rejected"
                       ? "bg-yellow-500"
                       : "bg-green-500"
-                  }`}
+                    }`}
                 >
                   {leave.status}
                 </span>
@@ -261,6 +274,16 @@ function LeaveForm() {
             </li>
           ))}
         </ul>
+
+        <Pagination
+          current={currentPage}
+          pageSize={pageSize}
+          total={activeLeaves.length}
+          onChange={handlePaginationChange}
+          showSizeChanger
+          pageSizeOptions={['6', '12', '24']}
+          className="w-[20%] mt-4 m-auto"
+        />
 
         {/* Comments Modal */}
         {showCommentsModal && (
