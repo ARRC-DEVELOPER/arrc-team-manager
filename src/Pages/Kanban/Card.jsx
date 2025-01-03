@@ -40,6 +40,8 @@ const Card = ({
     });
   };
 
+  console.log(loggedInUser.role.name)
+
   const handleMenuClick = (e) => {
     if (e.key === "edit") {
       handleEditClick();
@@ -79,10 +81,12 @@ const Card = ({
           <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
 
           {
-            loggedInUser?.role?.name == "Admin" || loggedInUser?.role?.name == "Manager" && (
+            loggedInUser.role.name == "Admin" || loggedInUser.role.name == "Manager" ? (
               <Dropdown overlay={menu} trigger={["click"]}>
                 <EllipsisOutlined className="absolute bottom-2 right-2 text-red-500 hover:text-blue-700 cursor-pointer text-xl font-bold" />
               </Dropdown>
+            ) : (
+              <></>
             )
           }
 

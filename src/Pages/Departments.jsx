@@ -33,23 +33,24 @@ const Departments = () => {
 
   console.log(newDepartment);
 
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        setLoading(true);
+  const fetchDepartments = async () => {
+    try {
+      setLoading(true);
 
-        const response = await axios.get(`${server}/departments`);
-        if (Array.isArray(response.data)) {
-          setDepartments(response.data);
-        } else {
-          console.error("Invalid data format received:", response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching departments:", error);
-      } finally {
-        setLoading(false); // End shimmer effect
+      const response = await axios.get(`${server}/departments`);
+      if (Array.isArray(response.data)) {
+        setDepartments(response.data);
+      } else {
+        console.error("Invalid data format received:", response.data);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+    } finally {
+      setLoading(false); // End shimmer effect
+    }
+  };
+
+  useEffect(() => {
     fetchDepartments();
   }, []);
 
@@ -118,12 +119,14 @@ const Departments = () => {
               : department
           )
         );
+        fetchDepartments();
       } else {
         const response = await axios.post(
           `${server}/departments`,
           newDepartment
         );
         setDepartments([...departments, response.data]);
+        fetchDepartments();
       }
 
       setNewDepartment({ name: "", color: "", description: "" });

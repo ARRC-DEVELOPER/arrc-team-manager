@@ -6,6 +6,7 @@ import { FiUpload, FiDownload, FiTrash2 } from "react-icons/fi";
 import * as XLSX from "xlsx";
 import { server } from "../main";
 import { Modal, Button, Pagination, message } from "antd";
+import AddLeadModal from "./AddLeadModal";
 
 const Leads = () => {
   const [leads, setLeads] = useState([]);
@@ -269,7 +270,7 @@ const Leads = () => {
       )}
 
       {/* Modal for Adding Leads */}
-      <Modal
+      {/* <Modal
         title="Add Lead"
         visible={isAddModalOpen}
         onCancel={handleAddLeadModalClose}
@@ -317,7 +318,13 @@ const Leads = () => {
             Save Leads
           </Button>
         </div>
-      </Modal>
+      </Modal> */}
+
+      <AddLeadModal
+        isOpen={isAddModalOpen}
+        onClose={handleAddLeadModalClose}
+        selectedLeadId={selectedLeadId}
+      />
     </div>
   );
 };

@@ -440,11 +440,14 @@ const AddTask = ({ setCards, editingTask, setEditingTask }) => {
               multiple
               required
             >
-              {users.map((user) => (
-                <option key={user._id} value={user._id}>
-                  {user.name}
-                </option>
-              ))}
+              {users
+                .filter(user => user.role?.name === "User")
+                .map((user) => (
+                  <option key={user._id} value={user._id}>
+                    {user.name}
+                  </option>
+                ))
+              }
             </select>
 
             {/* Display selected users */}

@@ -93,20 +93,23 @@ const Dashboard = () => {
       {
         label: "Completed",
         data: completedData,
-        backgroundColor: "#4CAF50",
-        borderWidth: 1,
+        backgroundColor: "rgb(76, 175, 80)", // Specific green color
+        borderWidth: 0,
+        borderRadius: 4,
       },
       {
         label: "Ongoing",
         data: ongoingData,
-        backgroundColor: "#03A9F4",
-        borderWidth: 1,
+        backgroundColor: "rgb(3, 169, 244)", // Specific blue color
+        borderWidth: 0,
+        borderRadius: 4,
       },
       {
         label: "Pending",
         data: pendingData,
-        backgroundColor: "#FF9800",
-        borderWidth: 1,
+        backgroundColor: "rgb(255, 152, 0)", // Specific orange color
+        borderWidth: 0,
+        borderRadius: 4,
       },
     ],
   };
@@ -226,11 +229,35 @@ const Dashboard = () => {
             options={{
               responsive: true,
               maintainAspectRatio: false,
+              scales: {
+                x: {
+                  grid: {
+                    display: false,
+                  },
+                },
+                y: {
+                  beginAtZero: true,
+                  max: 1.0,
+                  ticks: {
+                    stepSize: 0.1,
+                  },
+                  grid: {
+                    color: 'rgba(0, 0, 0, 0.1)',
+                  },
+                },
+              },
               plugins: {
                 legend: {
                   position: 'top',
+                  align: 'center',
+                  labels: {
+                    usePointStyle: true,
+                    padding: 20,
+                  },
                 },
               },
+              barPercentage: 0.8,
+              categoryPercentage: 0.9,
             }}
           />
         </div>
@@ -290,3 +317,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
